@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#15233F">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="حجز ميعاد">
+<title>حجز ميعاد بجهاز المدينة</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+  /* ========== الإعداد: حط لينك الـ Web App هنا ========== */
+  :root {
+    --paper: #F2F4F3;
+    --surface: #FFFFFF;
+    --ink: #15233F;
+    --ink-2: #55607A;
+    --line: #D6DCDA;
+    --stamp: #1E6B57;
+    --stamp-ink: #FFFFFF;
+    --stamp-soft: #E3EFEA;
+    --danger: #A8322B;
+    --danger-soft: #F6E4E2;
+    --focus: #2F6FDB;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0E1524;
+      --surface: #172135;
+      --ink: #E8ECF3;
+      --ink-2: #A3AEC2;
+      --line: #2B3752;
+      --stamp: #4FB894;
+      --stamp-ink: #08251C;
+      --stamp-soft: #15322A;
+      --danger: #F08C84;
+      --danger-soft: #3A1F1F;
+      --focus: #7FA8F5;
+      color-scheme: dark;
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, Arial, sans-serif;
+    font-size: 17px;
+    line-height: 1.6;
+    padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
+  }
+  .wrap { max-width: 460px; margin: 0 auto; padding: 20px 18px 40px; }
+
+  header.top { padding: 8px 0 22px; }
+  .agency { margin: 0; font-size: 14px; color: var(--ink-2); font-weight: 500; }
+  h1 { margin: 2px 0 0; font-size: 26px; line-height: 1.3; font-weight: 700; letter-spacing: -0.2px; }
+
+  h2 { margin: 0 0 4px; font-size: 21px; font-weight: 700; }
+  .hint { margin: 0 0 18px; color: var(--ink-2); font-size: 15px; }
+
+  button { font: inherit; color: inherit; }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+
+  .btn {
+    display: block; width: 100%; border: 0; border-radius: 12px;
+    padding: 15px 18px; font-size: 18px; font-weight: 700; cursor: pointer;
+    background: var(--stamp); color: var(--stamp-ink);
+  }
+  .btn[disabled] { opacity: .55; cursor: default; }
+  .btn.quiet { background: transparent; color: var(--ink); border: 1.5px solid var(--line); font-weight: 500; }
+  .btn + .btn { margin-top: 10px; }
+
+  .home-actions { display: grid; gap: 12px; margin-top: 8px; }
+  .home-actions .btn { text-align: right; padding: 20px; }
+  .home-actions small { display: block; font-weight: 400; font-size: 14px; opacity: .85; margin-top: 2px; }
+
+  /* الخطوات */
+  .steps { display: flex; gap: 6px; margin: 0 0 22px; padding: 0; list-style: none; }
+  .steps li { flex: 1; font-size: 12.5px; color: var(--ink-2); }
+  .steps li::before {
+    content: ""; display: block; height: 4px; border-radius: 2px; background: var(--line); margin-bottom: 6px;
+  }
+  .steps li.done::before, .steps li.now::before { background: var(--stamp); }
+  .steps li.now { color: var(--ink); font-weight: 700; }
+
+  .back { background: none; border: 0; padding: 6px 0; margin: 0 0 10px; color: var(--ink-2); cursor: pointer; font-size: 15px; }
+
+  label.field { display: block; font-weight: 500; margin-bottom: 8px; }
+  input.nid {
+    width: 100%; font: inherit; font-size: 24px; letter-spacing: 2px; text-align: center;
+    padding: 14px; border-radius: 12px; border: 1.5px solid var(--line);
+    background: var(--surface); color: var(--ink); direction: ltr;
+  }
+  input.nid:focus { border-color: var(--stamp); outline: none; box-shadow: 0 0 0 3px var(--stamp-soft); }
+  .count { font-size: 13px; color: var(--ink-2); text-align: left; margin: 6px 2px 18px; direction: ltr; }
+
+  /* قوائم الاختيار */
+  .choices { list-style: none; margin: 0 0 18px; padding: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .choices li + li { border-top: 1px solid var(--line); }
+  .choice {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    width: 100%; text-align: right; background: none; border: 0; padding: 16px 18px; cursor: pointer; font-size: 18px;
+  }
+  .choice[aria-pressed="true"] { background: var(--stamp-soft); }
+  .choice[aria-pressed="true"] .tick { opacity: 1; }
+  .choice[disabled] { cursor: default; color: var(--ink-2); }
+  .choice .meta { font-size: 14px; color: var(--ink-2); white-space: nowrap; }
+  .choice .meta.full { color: var(--danger); }
+  .tick { width: 22px; height: 22px; border-radius: 50%; background: var(--stamp); color: var(--stamp-ink); display: grid; place-items: center; font-size: 13px; opacity: 0; flex: none; }
+
+  .docs { margin: 0 0 18px; padding: 14px 18px; background: var(--surface); border: 1px dashed var(--line); border-radius: 12px; font-size: 15px; }
+  .docs strong { display: block; margin-bottom: 4px; }
+  .docs ul { margin: 0; padding-inline-start: 20px; }
+
+  .alert { padding: 12px 14px; border-radius: 10px; background: var(--danger-soft); color: var(--danger); font-size: 15px; margin: 0 0 16px; }
+  .empty { padding: 22px 18px; text-align: center; color: var(--ink-2); background: var(--surface); border-radius: 14px; border: 1px solid var(--line); margin-bottom: 18px; }
+
+  .summary { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 6px 18px; margin: 0 0 18px; }
+  .summary div { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; }
+  .summary div + div { border-top: 1px solid var(--line); }
+  .summary span { color: var(--ink-2); }
+
+  /* ========== التذكرة ========== */
+  .ticket {
+    --notch: 14px;
+    position: relative; background: var(--surface); border-radius: 16px; margin: 0 0 18px;
+    border: 1px solid var(--line);
+  }
+  .ticket .head { padding: 18px 20px 6px; }
+  .ticket .city { font-size: 14px; color: var(--ink-2); }
+  .ticket .service { font-size: 19px; font-weight: 700; }
+  .ticket .numbers { display: grid; grid-template-columns: 1.3fr 1fr; padding: 8px 20px 18px; align-items: end; }
+  .ticket .lbl { font-size: 14px; color: var(--ink-2); }
+  .ticket .big { font-size: 64px; font-weight: 700; line-height: 1; color: var(--stamp); }
+  .ticket .mid { font-size: 40px; font-weight: 700; line-height: 1.05; }
+  .ticket .date { padding: 0 20px 18px; font-weight: 500; }
+  .ticket .tear {
+    position: relative; height: 0; border-top: 2px dashed var(--line); margin: 0 var(--notch);
+  }
+  .ticket .tear::before, .ticket .tear::after {
+    content: ""; position: absolute; top: calc(var(--notch) * -1 - 1px); width: calc(var(--notch) * 2); height: calc(var(--notch) * 2);
+    border-radius: 50%; background: var(--paper); border: 1px solid var(--line);
+  }
+  .ticket .tear::before { right: calc(var(--notch) * -2); clip-path: inset(0 50% 0 0); }
+  .ticket .tear::after { left: calc(var(--notch) * -2); clip-path: inset(0 0 0 50%); }
+  .ticket .foot { display: flex; align-items: center; gap: 16px; padding: 18px 20px; }
+  .ticket .qr { background: #fff; padding: 6px; border-radius: 8px; flex: none; line-height: 0; }
+  .ticket .code { font-size: 15px; font-weight: 700; direction: ltr; text-align: left; word-break: break-all; }
+  .ticket .codelbl { font-size: 13px; color: var(--ink-2); }
+  .ticket.small .big { font-size: 40px; }
+  .ticket.small .mid { font-size: 28px; }
+  .ticket.small .numbers { padding-bottom: 12px; }
+
+  .confirm-pop { animation: pop .45s ease-out; }
+  @keyframes pop { from { transform: translateY(10px) scale(.98); opacity: 0; } to { transform: none; opacity: 1; } }
+  @media (prefers-reduced-motion: reduce) { .confirm-pop { animation: none; } }
+
+  .note { font-size: 15px; color: var(--ink-2); margin: 0 0 18px; }
+  .spinner { display: inline-block; width: 18px; height: 18px; border: 2.5px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; vertical-align: -3px; margin-inline-end: 8px; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  [hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <p class="agency">هيئة المجتمعات العمرانية الجديدة</p>
+    <h1>احجز دورك في جهاز المدينة</h1>
+  </header>
+  <main id="app" aria-live="polite"></main>
+</div>
+
+<script>
+// ===== حط هنا لينك الـ Web App اللي بيطلع من Apps Script بعد الـ Deploy =====
+const API_URL = 'https://script.google.com/macros/s/AKfycbxjgX1FjxsbrFJyvWLOxcp8u6zaZVUZfQjG6O6fdBf04ePdzoNW1G--48qdSN9rU6Lwgg/exec';
+
+const STEPS = ['الرقم القومي', 'المدينة', 'الخدمة', 'اليوم'];
+const state = { config: null, nid: '', cityId: '', serviceId: '', date: '', days: [] };
+const avail = {}; // cityId -> Promise لأيام كل خدمات المدينة
+
+// بنجيب أيام كل خدمات المدينة مرة واحدة أول ما تتختار
+function loadCityAvail(cityId, force) {
+  if (force || !avail[cityId]) {
+    avail[cityId] = api('cityAvailability', { cityId }).catch((e) => { delete avail[cityId]; throw e; });
+  }
+  return avail[cityId];
+}
+
+// حفظ المدن والخدمات على الجهاز علشان الفتح يبقى فوري
+const CFG_KEY = 'cb_config_v1';
+function readCachedConfig() {
+  try { const c = JSON.parse(localStorage.getItem(CFG_KEY)); return c && c.data && Array.isArray(c.data.cities) ? c.data : null; } catch (_) { return null; }
+}
+function writeCachedConfig(data) {
+  try { localStorage.setItem(CFG_KEY, JSON.stringify({ t: Date.now(), data })); } catch (_) {}
+}
+const app = document.getElementById('app');
+
+// ---------- أدوات ----------
+async function api(action, payload) {
+  if (API_URL.startsWith('PUT_')) throw new Error('لينك السيستم لسه متحطش في الصفحة');
+  let res;
+  try {
+    // من غير Content-Type مخصوص علشان المتصفح ميبعتش طلب OPTIONS
+    res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(Object.assign({ action }, payload)) });
+  } catch (_) {
+    throw new Error('مفيش اتصال بالإنترنت، اتأكد من النت وحاول تاني');
+  }
+  const j = await res.json().catch(() => ({ ok: false, error: 'السيستم مش بيرد دلوقتي، حاول تاني بعد شوية' }));
+  if (!j.ok) throw new Error(j.error);
+  return j.data;
+}
+
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const arNum = (n) => Number(n).toLocaleString('ar-EG');
+const fmtDay = (d) => new Intl.DateTimeFormat('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' }).format(new Date(d + 'T00:00:00Z'));
+const city = () => state.config.cities.find((c) => c.id === state.cityId);
+const service = () => city()?.services.find((s) => s.id === state.serviceId);
+
+function normalizeDigits(raw) {
+  return String(raw ?? '')
+    .replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))
+    .replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
+    .replace(/\D/g, '');
+}
+const GOV = ['01','02','03','04','11','12','13','14','15','16','17','18','19','21','22','23','24','25','26','27','28','29','31','32','33','34','35','88'];
+function nidError(nid) {
+  if (nid.length !== 14) return 'الرقم القومي لازم يكون ١٤ رقم';
+  if (nid[0] !== '2' && nid[0] !== '3') return 'الرقم القومي غير صحيح';
+  const y = (nid[0] === '2' ? 1900 : 2000) + +nid.slice(1, 3), m = +nid.slice(3, 5), d = +nid.slice(5, 7);
+  const b = new Date(Date.UTC(y, m - 1, d));
+  if (b.getUTCFullYear() !== y || b.getUTCMonth() !== m - 1 || b.getUTCDate() !== d) return 'تاريخ الميلاد في الرقم القومي غير صحيح';
+  if (!GOV.includes(nid.slice(7, 9))) return 'كود المحافظة في الرقم القومي غير صحيح';
+  return '';
+}
+
+function stepsBar(i) {
+  return '<ol class="steps">' + STEPS.map((s, k) =>
+    `<li class="${k < i ? 'done' : k === i ? 'now' : ''}"${k === i ? ' aria-current="step"' : ''}>${s}</li>`).join('') + '</ol>';
+}
+const alertBox = (msg) => msg ? `<p class="alert" role="alert">${esc(msg)}</p>` : '';
+function busy(btn, text) { btn.disabled = true; btn.dataset.label = btn.innerHTML; btn.innerHTML = `<span class="spinner"></span>${text}`; }
+function idle(btn) { btn.disabled = false; btn.innerHTML = btn.dataset.label; }
+function focusTitle() { app.querySelector('h2')?.focus({ preventScroll: true }); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+
+// ---------- الشاشات ----------
+function showHome(msg) {
+  app.innerHTML = `
+    ${alertBox(msg)}
+    <div class="home-actions">
+      <button class="btn" id="go-book">احجز ميعاد<small>اختار المدينة والخدمة واليوم</small></button>
+      <button class="btn quiet" id="go-mine">حجوزاتي<small>شوف أو الغي حجز عملته</small></button>
+    </div>`;
+  document.getElementById('go-book').onclick = () => { Object.assign(state, { cityId: '', serviceId: '', date: '' }); showNid('book'); };
+  document.getElementById('go-mine').onclick = () => showNid('mine');
+}
+
+function showNid(mode, msg) {
+  const forBook = mode === 'book';
+  app.innerHTML = `
+    <button class="back" id="back">رجوع</button>
+    ${forBook ? stepsBar(0) : ''}
+    <h2 tabindex="-1">${forBook ? 'اكتب رقمك القومي' : 'حجوزاتي'}</h2>
+    <p class="hint">${forBook ? 'الحجز باسم صاحب البطاقة، والموظف هيراجع البطاقة الأصلية على الشباك.' : 'اكتب الرقم القومي اللي حجزت بيه.'}</p>
+    ${alertBox(msg)}
+    <label class="field" for="nid">الرقم القومي (١٤ رقم)</label>
+    <input class="nid" id="nid" inputmode="numeric" autocomplete="off" maxlength="20" value="${esc(state.nid)}" placeholder="2xxxxxxxxxxxxx">
+    <div class="count" id="count"></div>
+    <button class="btn" id="next">${forBook ? 'التالي' : 'اعرض حجوزاتي'}</button>`;
+  const input = document.getElementById('nid'), count = document.getElementById('count');
+  const upd = () => { count.textContent = normalizeDigits(input.value).length + ' / 14'; };
+  input.oninput = upd; upd(); input.focus();
+  document.getElementById('back').onclick = () => showHome();
+  const go = async () => {
+    const nid = normalizeDigits(input.value);
+    const err = nidError(nid);
+    if (err) return showNid(mode, err);
+    state.nid = nid;
+    if (forBook) return showCity();
+    const btn = document.getElementById('next'); busy(btn, 'جاري البحث');
+    try { showMine(await api('myBookings', { nationalId: nid })); }
+    catch (e) { showNid(mode, e.message); }
+  };
+  document.getElementById('next').onclick = go;
+  input.onkeydown = (e) => { if (e.key === 'Enter') go(); };
+}
+
+function choiceList(items, selectedId) {
+  return '<ul class="choices">' + items.map((it) => `
+    <li><button class="choice" data-id="${esc(it.id)}" aria-pressed="${it.id === selectedId}" ${it.disabled ? 'disabled' : ''}>
+      <span>${esc(it.label)}</span>
+      ${it.meta ? `<span class="meta ${it.full ? 'full' : ''}">${esc(it.meta)}</span>` : '<span class="tick" aria-hidden="true">✓</span>'}
+    </button></li>`).join('') + '</ul>';
+}
+
+function showCity() {
+  const cities = state.config.cities;
+  app.innerHTML = `
+    <button class="back" id="back">رجوع</button>
+    ${stepsBar(1)}
+    <h2 tabindex="-1">اختار جهاز المدينة</h2>
+    <p class="hint">الجهاز اللي هتروحله يوم الميعاد.</p>
+    ${cities.length ? choiceList(cities.map((c) => ({ id: c.id, label: c.name })), state.cityId)
+      : '<div class="empty">مفيش أجهزة متاحة للحجز دلوقتي.</div>'}`;
+  document.getElementById('back').onclick = () => showNid('book');
+  app.querySelectorAll('.choice').forEach((b) => b.onclick = () => {
+    if (state.cityId !== b.dataset.id) state.serviceId = '';
+    state.cityId = b.dataset.id;
+    loadCityAvail(state.cityId).catch(() => {});
+    showService();
+  });
+  focusTitle();
+}
+
+function showService() {
+  const svcs = city().services;
+  app.innerHTML = `
+    <button class="back" id="back">رجوع</button>
+    ${stepsBar(2)}
+    <h2 tabindex="-1">اختار الخدمة</h2>
+    <p class="hint">جهاز ${esc(city().name)}</p>
+    ${choiceList(svcs.map((s) => ({ id: s.id, label: s.name })), state.serviceId)}`;
+  document.getElementById('back').onclick = showCity;
+  app.querySelectorAll('.choice').forEach((b) => b.onclick = () => { state.serviceId = b.dataset.id; state.date = ''; showDays(); });
+  focusTitle();
+}
+
+function docsBox(docs) {
+  if (!docs || !docs.length) return '';
+  return `<div class="docs"><strong>هات معاك يوم الميعاد</strong><ul>${docs.map((d) => `<li>${esc(d)}</li>`).join('')}</ul></div>`;
+}
+
+async function showDays(msg) {
+  app.innerHTML = `
+    <button class="back" id="back">رجوع</button>
+    ${stepsBar(3)}
+    <h2 tabindex="-1">اختار اليوم</h2>
+    <p class="hint">${esc(service().name)} · جهاز ${esc(city().name)}</p>
+    ${alertBox(msg)}
+    <div class="empty"><span class="spinner"></span>بنجيب الأيام المتاحة</div>`;
+  document.getElementById('back').onclick = showService;
+  focusTitle();
+  try {
+    const { services } = await loadCityAvail(state.cityId, !!msg);
+    state.days = services[state.serviceId] || [];
+    renderDays(msg);
+  } catch (e) {
+    app.querySelector('.empty').outerHTML = alertBox(e.message);
+  }
+}
+
+function renderDays(msg) {
+  const days = state.days;
+  const open = days.filter((d) => d.remaining !== 0);
+  const items = days.map((d) => ({
+    id: d.date, label: fmtDay(d.date), disabled: d.remaining === 0, full: d.remaining === 0,
+    meta: d.remaining === 0 ? 'اكتمل' : d.remaining === null ? 'متاح' : `باقي ${arNum(d.remaining)} مكان`,
+  }));
+  app.innerHTML = `
+    <button class="back" id="back">رجوع</button>
+    ${stepsBar(3)}
+    <h2 tabindex="-1">اختار اليوم</h2>
+    <p class="hint">${esc(service().name)} · جهاز ${esc(city().name)}</p>
+    ${alertBox(msg)}
+    ${open.length ? choiceList(items, state.date) : '<div class="empty">كل الأيام المتاحة اكتملت. جرّب تاني بكرة، بيتفتح يوم جديد كل يوم.</div>'}
+    ${state.date ? `
+      <div class="summary">
+        <div><span>الخدمة</span><b>${esc(service().name)}</b></div>
+        <div><span>الجهاز</span><b>${esc(city().name)}</b></div>
+        <div><span>اليوم</span><b>${esc(fmtDay(state.date))}</b></div>
+      </div>
+      ${docsBox(service().requiredDocs)}
+      <button class="btn" id="confirm">أكّد الحجز</button>` : ''}`;
+  document.getElementById('back').onclick = showService;
+  app.querySelectorAll('.choice').forEach((b) => b.onclick = () => {
+    state.date = b.dataset.id; renderDays();
+    document.getElementById('confirm')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+  const confirm = document.getElementById('confirm');
+  if (confirm) confirm.onclick = async () => {
+    busy(confirm, 'بنسجل حجزك، ثواني');
+    try {
+      const b = await api('book', { nationalId: state.nid, cityId: state.cityId, serviceId: state.serviceId, date: state.date });
+      delete avail[state.cityId];
+      showTicket(b);
+    } catch (e) {
+      state.date = '';
+      showDays(e.message);
+    }
+  };
+}
+
+function ticketHtml(b, small) {
+  return `
+    <article class="ticket ${small ? 'small' : 'confirm-pop'}" aria-label="تذكرة الحجز">
+      <div class="head">
+        <div class="city">جهاز ${esc(b.cityName)}</div>
+        <div class="service">${esc(b.serviceName)}</div>
+      </div>
+      <div class="numbers">
+        <div><div class="lbl">رقم دورك</div><div class="big">${arNum(b.seq)}</div></div>
+        <div>${b.window ? `<div class="lbl">الشباك</div><div class="mid">${/^\d+$/.test(b.window) ? arNum(b.window) : esc(b.window)}</div>` : ''}</div>
+      </div>
+      <div class="date">${esc(fmtDay(b.date))}</div>
+      <div class="tear" aria-hidden="true"></div>
+      <div class="foot">
+        <div class="qr" data-code="${esc(b.code)}"></div>
+        <div>
+          <div class="codelbl">كود الحجز</div>
+          <div class="code">${esc(b.code)}</div>
+          <div class="codelbl">البطاقة: <bdi dir="ltr">${esc(b.nidMasked)}</bdi></div>
+        </div>
+      </div>
+    </article>`;
+}
+
+function drawQrs(size) {
+  app.querySelectorAll('.qr[data-code]').forEach((el) => {
+    if (window.QRCode) new QRCode(el, { text: el.dataset.code, width: size, height: size, correctLevel: QRCode.CorrectLevel.M });
+    else el.remove(); // لو مكتبة الـ QR ماحملتش، الكود مكتوب كفاية
+  });
+}
+
+function showTicket(b) {
+  app.innerHTML = `
+    <h2 tabindex="-1">تم الحجز</h2>
+    <p class="hint">صوّر الشاشة دي أو اكتب كود الحجز. هتحتاجه انت والبطاقة الأصلية يوم الميعاد.</p>
+    ${ticketHtml(b)}
+    ${docsBox(b.requiredDocs)}
+    <button class="btn" id="home">تمام</button>
+    <button class="btn quiet" id="mine">حجوزاتي</button>`;
+  drawQrs(112);
+  document.getElementById('home').onclick = () => showHome();
+  document.getElementById('mine').onclick = async (e) => {
+    busy(e.currentTarget, 'جاري التحميل');
+    try { showMine(await api('myBookings', { nationalId: state.nid })); } catch (err) { showHome(err.message); }
+  };
+  focusTitle();
+}
+
+function showMine({ bookings = [] } = {}, msg) {
+  app.innerHTML = `
+    <button class="back" id="back">الرئيسية</button>
+    <h2 tabindex="-1">حجوزاتي</h2>
+    <p class="hint">الحجوزات اللي لسه ميعادها مجاش. تقدر تحجز ٣ خدمات مختلفة بحد أقصى.</p>
+    ${alertBox(msg)}
+    ${bookings.length ? bookings.map((b) => `
+      ${ticketHtml(b, true)}
+      <button class="btn quiet cancel" data-code="${esc(b.code)}" style="margin:-8px 0 22px">الغي الحجز ده</button>`).join('')
+      : '<div class="empty">مفيش حجوزات قائمة على الرقم ده.</div>'}
+    <button class="btn" id="new">احجز ميعاد جديد</button>`;
+  drawQrs(84);
+  document.getElementById('back').onclick = () => showHome();
+  document.getElementById('new').onclick = () => { Object.assign(state, { cityId: '', serviceId: '', date: '' }); showCity(); };
+  app.querySelectorAll('.cancel').forEach((btn) => btn.onclick = async () => {
+    if (!confirm('متأكد إنك عايز تلغي الحجز ' + btn.dataset.code + '؟ مكانك هيروح لحد تاني.')) return;
+    busy(btn, 'جاري الإلغاء');
+    try {
+      await api('cancel', { nationalId: state.nid, code: btn.dataset.code });
+      showMine(await api('myBookings', { nationalId: state.nid }));
+    } catch (e) {
+      idle(btn);
+      showMine({ bookings }, e.message);
+    }
+  });
+  focusTitle();
+}
+
+// ---------- البداية ----------
+(async function init() {
+  const cached = readCachedConfig();
+  const fresh = api('config', {}).then((data) => { state.config = data; writeCachedConfig(data); return data; });
+  if (cached) {
+    state.config = cached;
+    showHome();
+    fresh.catch(() => {}); // لو التحديث فشل نكمل باللي محفوظ
+    return;
+  }
+  app.innerHTML = '<div class="empty"><span class="spinner"></span>جاري التحميل، أول مرة بتاخد ثواني</div>';
+  try {
+    await fresh;
+    showHome();
+  } catch (e) {
+    app.innerHTML = alertBox(e.message) + '<button class="btn" onclick="location.reload()">حاول تاني</button>';
+  }
+})();
+
+// تشغيل الـ Service Worker (بيشتغل بس على https، مش من ملف على الجهاز)
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+}
+</script>
+</body>
+</html>
