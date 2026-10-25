@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#0B4F8A">
+<meta name="theme-color" content="#0E3A55">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -17,16 +17,18 @@
 <style>
   /* ===== ألوان الهوية: غيّرها هنا بس ===== */
   :root {
-    --paper: #F3F6F9;
+    --paper: #F5F4EF;
     --surface: #FFFFFF;
-    --ink: #0F1E33;
-    --ink-2: #56637A;
-    --line: #D9E0E8;
-    --brand: #0B4F8A;
+    --ink: #10222F;
+    --ink-2: #5A6670;
+    --line: #DED9CC;
+    --brand: #0E3A55;       /* كحلي مركز المعلومات */
     --brand-ink: #FFFFFF;
-    --brand-soft: #E5EEF7;
-    --accent: #1E7B5C;
-    --accent-soft: #E3F1EB;
+    --brand-soft: #E6EDF2;
+    --accent: #3B7A24;      /* أخضر الهيئة */
+    --accent-soft: #E7F1E1;
+    --gold: #C4952F;        /* دهبي الهيئة */
+    --gold-soft: #F6ECD5;
     --danger: #A8322B;
     --danger-soft: #F6E4E2;
     --focus: #2F6FDB;
@@ -34,16 +36,18 @@
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --paper: #0B1422;
-      --surface: #13203A;
-      --ink: #E8EEF6;
-      --ink-2: #9FB0C8;
-      --line: #26364F;
-      --brand: #5FA3E6;
-      --brand-ink: #061A2E;
-      --brand-soft: #132C47;
-      --accent: #4FB894;
-      --accent-soft: #15322A;
+      --paper: #0A1720;
+      --surface: #11232F;
+      --ink: #EAF0F3;
+      --ink-2: #A3B2BC;
+      --line: #24394A;
+      --brand: #7FB3D3;
+      --brand-ink: #06202F;
+      --brand-soft: #16334A;
+      --accent: #78BF5A;
+      --accent-soft: #1A3320;
+      --gold: #E2B656;
+      --gold-soft: #3A2F16;
       --danger: #F08C84;
       --danger-soft: #3A1F1F;
       --focus: #8DB6F5;
@@ -65,18 +69,20 @@
   svg.i { width: 24px; height: 24px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
   /* ===== الهيدر ===== */
-  .topbar { background: var(--surface); border-bottom: 1px solid var(--line); }
+  .topbar { background: var(--surface); border-bottom: 3px solid var(--gold); }
   .topbar .in { max-width: 520px; margin: 0 auto; padding: 12px 18px; display: flex; align-items: center; gap: 12px; }
-  .logo { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border-radius: 10px; overflow: hidden; }
+  .logo { width: 46px; height: 52px; flex: none; display: grid; place-items: center; border-radius: 10px; overflow: hidden; background: #fff; padding: 3px; }
   .logo img { width: 100%; height: 100%; object-fit: contain; }
   .logo .mark { width: 100%; height: 100%; background: var(--brand); color: var(--brand-ink); display: grid; place-items: center; }
   .org { line-height: 1.3; min-width: 0; }
-  .org b { display: block; font-size: 15.5px; }
+  .org b { display: block; font-size: 16px; color: var(--brand); }
+  @media (prefers-color-scheme: dark) { .org b { color: var(--ink); } }
   .org span { font-size: 13px; color: var(--ink-2); }
 
   .wrap { max-width: 520px; margin: 0 auto; padding: 20px 18px calc(96px + env(safe-area-inset-bottom, 0px)); }
   h2 { margin: 0 0 4px; font-size: 22px; line-height: 1.35; }
-  h3 { margin: 26px 0 10px; font-size: 17px; }
+  h3 { margin: 26px 0 10px; font-size: 17px; display: flex; align-items: center; gap: 8px; }
+  h3::before { content: ""; width: 4px; height: 18px; border-radius: 2px; background: var(--gold); }
   .hint { margin: 0 0 18px; color: var(--ink-2); font-size: 15px; }
   .back { display: inline-flex; align-items: center; gap: 4px; background: none; border: 0; padding: 4px 0; margin: 0 0 12px; color: var(--ink-2); cursor: pointer; font-size: 15px; }
   .back svg { width: 18px; height: 18px; transform: scaleX(-1); }
@@ -88,8 +94,9 @@
   .link { background: none; border: 0; color: var(--brand); font-weight: 700; cursor: pointer; padding: 4px; text-decoration: underline; text-underline-offset: 3px; }
 
   /* ===== بطاقة الحجز في الرئيسية ===== */
-  .hero { display: flex; align-items: center; gap: 14px; width: 100%; text-align: right; border: 0; cursor: pointer; border-radius: 16px; padding: 20px 18px; background: var(--brand); color: var(--brand-ink); }
-  .hero .ic { width: 52px; height: 52px; border-radius: 14px; background: rgba(255,255,255,.16); display: grid; place-items: center; flex: none; }
+  .hero { display: flex; align-items: center; gap: 14px; width: 100%; text-align: right; border: 0; border-inline-start: 5px solid var(--gold); cursor: pointer; border-radius: 16px; padding: 20px 18px; background: var(--brand); color: var(--brand-ink); }
+  .hero .ic { width: 52px; height: 52px; border-radius: 14px; background: var(--gold); color: #fff; display: grid; place-items: center; flex: none; }
+  @media (prefers-color-scheme: dark) { .hero { background: #164764; color: #fff; } }
   .hero .ic svg { width: 28px; height: 28px; }
   .hero b { display: block; font-size: 19px; line-height: 1.35; }
   .hero span { font-size: 14px; opacity: .9; }
@@ -102,13 +109,13 @@
   .list li + li { border-top: 1px solid var(--line); }
   .row { display: flex; align-items: center; gap: 12px; width: 100%; text-align: right; background: none; border: 0; padding: 14px 16px; cursor: pointer; font-size: 16.5px; }
   .row[disabled] { cursor: default; }
-  .row .ic { width: 42px; height: 42px; border-radius: 12px; background: var(--brand-soft); color: var(--brand); display: grid; place-items: center; flex: none; }
+  .row .ic { width: 42px; height: 42px; border-radius: 12px; background: var(--accent-soft); color: var(--accent); display: grid; place-items: center; flex: none; }
   .row .tx { flex: 1; min-width: 0; line-height: 1.4; }
   .row .tx small { display: block; color: var(--ink-2); font-size: 13.5px; }
   .row .end { color: var(--ink-2); display: flex; align-items: center; }
   .row .end svg { width: 20px; height: 20px; }
   .row .chev { transform: scaleX(-1); }
-  .pill { font-size: 12.5px; padding: 3px 10px; border-radius: 99px; background: var(--paper); border: 1px solid var(--line); color: var(--ink-2); white-space: nowrap; }
+  .pill { font-size: 12.5px; padding: 3px 10px; border-radius: 99px; background: var(--gold-soft); color: var(--ink); white-space: nowrap; }
 
   .choice { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; text-align: right; background: none; border: 0; padding: 15px 18px; cursor: pointer; font-size: 17.5px; }
   .choice[aria-pressed="true"] { background: var(--accent-soft); }
@@ -172,11 +179,19 @@
   .confirm-pop { animation: pop .45s ease-out; }
   @keyframes pop { from { transform: translateY(10px) scale(.98); opacity: 0; } to { transform: none; opacity: 1; } }
 
+  /* ===== حقوق الملكية ===== */
+  .wrap { padding-bottom: 8px; }
+  footer.credit { max-width: 520px; margin: 0 auto; padding: 18px 18px calc(92px + env(safe-area-inset-bottom, 0px)); }
+  footer.credit .in { display: flex; align-items: center; gap: 14px; padding-top: 16px; border-top: 1px solid var(--line); }
+  footer.credit img { width: 64px; height: 64px; object-fit: contain; background: #fff; border-radius: 12px; padding: 4px; flex: none; }
+  footer.credit p { margin: 0; font-size: 13px; line-height: 1.6; color: var(--ink-2); }
+  footer.credit b { color: var(--ink); font-weight: 500; }
+
   /* ===== الشريط اللي تحت ===== */
   nav.tabs { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); z-index: 10; }
   nav.tabs .in { max-width: 520px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); }
   nav.tabs a { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 9px 4px 10px; color: var(--ink-2); text-decoration: none; font-size: 12.5px; }
-  nav.tabs a[aria-current="page"] { color: var(--brand); font-weight: 700; }
+  nav.tabs a[aria-current="page"] { color: var(--brand); font-weight: 700; box-shadow: inset 0 3px 0 var(--gold); }
 
   .spinner { display: inline-block; width: 18px; height: 18px; border: 2.5px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; vertical-align: -3px; margin-inline-end: 8px; }
   @keyframes spin { to { transform: rotate(360deg); } }
@@ -186,11 +201,17 @@
 <body>
 <header class="topbar">
   <div class="in">
-    <div class="logo" id="logo"><div class="mark" id="logo-mark"></div></div>
+    <div class="logo"><img src="icons/logo.png" alt="شعار هيئة المجتمعات العمرانية الجديدة" width="46" height="52"></div>
     <div class="org"><b>هيئة المجتمعات العمرانية الجديدة</b><span>بوابة الخدمات الإلكترونية</span></div>
   </div>
 </header>
 <main class="wrap" id="app" aria-live="polite"></main>
+<footer class="credit">
+  <div class="in">
+    <img src="icons/info-center.jpg" alt="شعار مركز معلومات هيئة المجتمعات العمرانية" width="64" height="64" loading="lazy">
+    <p>تصميم وتطوير وتشغيل<br><b>مركز معلومات هيئة المجتمعات العمرانية الجديدة</b><br>جميع الحقوق محفوظة © <span id="yr"></span></p>
+  </div>
+</footer>
 <nav class="tabs" aria-label="التنقل">
   <div class="in">
     <a href="#/" data-tab="home"><span data-icon="home"></span>الرئيسية</a>
@@ -233,11 +254,6 @@ const ICONS = {
 };
 document.querySelectorAll('[data-icon]').forEach((el) => { el.outerHTML = ICONS[el.dataset.icon]; });
 
-// لوجو الهيئة: لو ملف icons/logo.png موجود يظهر، ولو مش موجود تفضل العلامة البديلة
-document.getElementById('logo-mark').innerHTML = ICONS.city;
-(() => { const img = new Image(); img.alt = 'شعار الهيئة';
-  img.onload = () => { const box = document.getElementById('logo'); box.innerHTML = ''; box.appendChild(img); };
-  img.src = 'icons/logo.png'; })();
 
 const STEPS = ['الرقم القومي', 'المدينة', 'الخدمة', 'اليوم'];
 const state = { config: null, nid: '', cityId: '', serviceId: '', date: '', days: [], next: '' };
@@ -654,6 +670,7 @@ if (session) api('citizenMe', { token: session.token })
   .then((r) => setSession(Object.assign({}, session, { user: r.user })))
   .catch((e) => { if (/سجل دخول/.test(e.message)) { setSession(null); route(); } });
 
+document.getElementById('yr').textContent = new Date().getFullYear().toLocaleString('ar-EG', { useGrouping: false });
 route();
 
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
