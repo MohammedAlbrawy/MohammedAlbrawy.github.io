@@ -3,28 +3,30 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#15233F">
+<meta name="theme-color" content="#0B4F8A">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="حجز ميعاد">
-<title>حجز ميعاد بجهاز المدينة</title>
+<meta name="apple-mobile-web-app-title" content="خدمات الهيئة">
+<title>بوابة خدمات هيئة المجتمعات العمرانية الجديدة</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
-  /* ========== الإعداد: حط لينك الـ Web App هنا ========== */
+  /* ===== ألوان الهوية: غيّرها هنا بس ===== */
   :root {
-    --paper: #F2F4F3;
+    --paper: #F3F6F9;
     --surface: #FFFFFF;
-    --ink: #15233F;
-    --ink-2: #55607A;
-    --line: #D6DCDA;
-    --stamp: #1E6B57;
-    --stamp-ink: #FFFFFF;
-    --stamp-soft: #E3EFEA;
+    --ink: #0F1E33;
+    --ink-2: #56637A;
+    --line: #D9E0E8;
+    --brand: #0B4F8A;
+    --brand-ink: #FFFFFF;
+    --brand-soft: #E5EEF7;
+    --accent: #1E7B5C;
+    --accent-soft: #E3F1EB;
     --danger: #A8322B;
     --danger-soft: #F6E4E2;
     --focus: #2F6FDB;
@@ -32,17 +34,19 @@
   }
   @media (prefers-color-scheme: dark) {
     :root {
-      --paper: #0E1524;
-      --surface: #172135;
-      --ink: #E8ECF3;
-      --ink-2: #A3AEC2;
-      --line: #2B3752;
-      --stamp: #4FB894;
-      --stamp-ink: #08251C;
-      --stamp-soft: #15322A;
+      --paper: #0B1422;
+      --surface: #13203A;
+      --ink: #E8EEF6;
+      --ink-2: #9FB0C8;
+      --line: #26364F;
+      --brand: #5FA3E6;
+      --brand-ink: #061A2E;
+      --brand-soft: #132C47;
+      --accent: #4FB894;
+      --accent-soft: #15322A;
       --danger: #F08C84;
       --danger-soft: #3A1F1F;
-      --focus: #7FA8F5;
+      --focus: #8DB6F5;
       color-scheme: dark;
     }
   }
@@ -50,106 +54,113 @@
   * { box-sizing: border-box; }
   html { -webkit-text-size-adjust: 100%; }
   body {
-    margin: 0;
-    background: var(--paper);
-    color: var(--ink);
+    margin: 0; background: var(--paper); color: var(--ink);
     font-family: "IBM Plex Sans Arabic", "Segoe UI", Tahoma, Arial, sans-serif;
-    font-size: 17px;
-    line-height: 1.6;
-    padding: env(safe-area-inset-top, 0px) 0 env(safe-area-inset-bottom, 0px);
+    font-size: 17px; line-height: 1.6;
+    padding-top: env(safe-area-inset-top, 0px);
   }
-  .wrap { max-width: 460px; margin: 0 auto; padding: 20px 18px 40px; }
-
-  header.top { padding: 8px 0 22px; }
-  .agency { margin: 0; font-size: 14px; color: var(--ink-2); font-weight: 500; }
-  h1 { margin: 2px 0 0; font-size: 26px; line-height: 1.3; font-weight: 700; letter-spacing: -0.2px; }
-
-  h2 { margin: 0 0 4px; font-size: 21px; font-weight: 700; }
-  .hint { margin: 0 0 18px; color: var(--ink-2); font-size: 15px; }
-
-  button { font: inherit; color: inherit; }
+  button, input { font: inherit; color: inherit; }
   :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  [hidden] { display: none !important; }
+  svg.i { width: 24px; height: 24px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
-  .btn {
-    display: block; width: 100%; border: 0; border-radius: 12px;
-    padding: 15px 18px; font-size: 18px; font-weight: 700; cursor: pointer;
-    background: var(--stamp); color: var(--stamp-ink);
-  }
+  /* ===== الهيدر ===== */
+  .topbar { background: var(--surface); border-bottom: 1px solid var(--line); }
+  .topbar .in { max-width: 520px; margin: 0 auto; padding: 12px 18px; display: flex; align-items: center; gap: 12px; }
+  .logo { width: 44px; height: 44px; flex: none; display: grid; place-items: center; border-radius: 10px; overflow: hidden; }
+  .logo img { width: 100%; height: 100%; object-fit: contain; }
+  .logo .mark { width: 100%; height: 100%; background: var(--brand); color: var(--brand-ink); display: grid; place-items: center; }
+  .org { line-height: 1.3; min-width: 0; }
+  .org b { display: block; font-size: 15.5px; }
+  .org span { font-size: 13px; color: var(--ink-2); }
+
+  .wrap { max-width: 520px; margin: 0 auto; padding: 20px 18px calc(96px + env(safe-area-inset-bottom, 0px)); }
+  h2 { margin: 0 0 4px; font-size: 22px; line-height: 1.35; }
+  h3 { margin: 26px 0 10px; font-size: 17px; }
+  .hint { margin: 0 0 18px; color: var(--ink-2); font-size: 15px; }
+  .back { display: inline-flex; align-items: center; gap: 4px; background: none; border: 0; padding: 4px 0; margin: 0 0 12px; color: var(--ink-2); cursor: pointer; font-size: 15px; }
+  .back svg { width: 18px; height: 18px; transform: scaleX(-1); }
+
+  .btn { display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; border: 0; border-radius: 12px; padding: 14px 18px; font-size: 17.5px; font-weight: 700; cursor: pointer; background: var(--brand); color: var(--brand-ink); text-decoration: none; }
   .btn[disabled] { opacity: .55; cursor: default; }
   .btn.quiet { background: transparent; color: var(--ink); border: 1.5px solid var(--line); font-weight: 500; }
   .btn + .btn { margin-top: 10px; }
+  .link { background: none; border: 0; color: var(--brand); font-weight: 700; cursor: pointer; padding: 4px; text-decoration: underline; text-underline-offset: 3px; }
 
-  .home-actions { display: grid; gap: 12px; margin-top: 8px; }
-  .home-actions .btn { text-align: right; padding: 20px; }
-  .home-actions small { display: block; font-weight: 400; font-size: 14px; opacity: .85; margin-top: 2px; }
+  /* ===== بطاقة الحجز في الرئيسية ===== */
+  .hero { display: flex; align-items: center; gap: 14px; width: 100%; text-align: right; border: 0; cursor: pointer; border-radius: 16px; padding: 20px 18px; background: var(--brand); color: var(--brand-ink); }
+  .hero .ic { width: 52px; height: 52px; border-radius: 14px; background: rgba(255,255,255,.16); display: grid; place-items: center; flex: none; }
+  .hero .ic svg { width: 28px; height: 28px; }
+  .hero b { display: block; font-size: 19px; line-height: 1.35; }
+  .hero span { font-size: 14px; opacity: .9; }
+  .hero .go { margin-inline-start: auto; }
 
-  /* الخطوات */
-  .steps { display: flex; gap: 6px; margin: 0 0 22px; padding: 0; list-style: none; }
-  .steps li { flex: 1; font-size: 12.5px; color: var(--ink-2); }
-  .steps li::before {
-    content: ""; display: block; height: 4px; border-radius: 2px; background: var(--line); margin-bottom: 6px;
-  }
-  .steps li.done::before, .steps li.now::before { background: var(--stamp); }
-  .steps li.now { color: var(--ink); font-weight: 700; }
+  .signin-note { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 14px; border-radius: 12px; background: var(--brand-soft); font-size: 15px; margin-bottom: 12px; }
 
-  .back { background: none; border: 0; padding: 6px 0; margin: 0 0 10px; color: var(--ink-2); cursor: pointer; font-size: 15px; }
+  /* ===== القوائم ===== */
+  .list { list-style: none; margin: 0 0 18px; padding: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
+  .list li + li { border-top: 1px solid var(--line); }
+  .row { display: flex; align-items: center; gap: 12px; width: 100%; text-align: right; background: none; border: 0; padding: 14px 16px; cursor: pointer; font-size: 16.5px; }
+  .row[disabled] { cursor: default; }
+  .row .ic { width: 42px; height: 42px; border-radius: 12px; background: var(--brand-soft); color: var(--brand); display: grid; place-items: center; flex: none; }
+  .row .tx { flex: 1; min-width: 0; line-height: 1.4; }
+  .row .tx small { display: block; color: var(--ink-2); font-size: 13.5px; }
+  .row .end { color: var(--ink-2); display: flex; align-items: center; }
+  .row .end svg { width: 20px; height: 20px; }
+  .row .chev { transform: scaleX(-1); }
+  .pill { font-size: 12.5px; padding: 3px 10px; border-radius: 99px; background: var(--paper); border: 1px solid var(--line); color: var(--ink-2); white-space: nowrap; }
 
-  label.field { display: block; font-weight: 500; margin-bottom: 8px; }
-  input.nid {
-    width: 100%; font: inherit; font-size: 24px; letter-spacing: 2px; text-align: center;
-    padding: 14px; border-radius: 12px; border: 1.5px solid var(--line);
-    background: var(--surface); color: var(--ink); direction: ltr;
-  }
-  input.nid:focus { border-color: var(--stamp); outline: none; box-shadow: 0 0 0 3px var(--stamp-soft); }
-  .count { font-size: 13px; color: var(--ink-2); text-align: left; margin: 6px 2px 18px; direction: ltr; }
-
-  /* قوائم الاختيار */
-  .choices { list-style: none; margin: 0 0 18px; padding: 0; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; }
-  .choices li + li { border-top: 1px solid var(--line); }
-  .choice {
-    display: flex; align-items: center; justify-content: space-between; gap: 12px;
-    width: 100%; text-align: right; background: none; border: 0; padding: 16px 18px; cursor: pointer; font-size: 18px;
-  }
-  .choice[aria-pressed="true"] { background: var(--stamp-soft); }
-  .choice[aria-pressed="true"] .tick { opacity: 1; }
+  .choice { display: flex; align-items: center; justify-content: space-between; gap: 12px; width: 100%; text-align: right; background: none; border: 0; padding: 15px 18px; cursor: pointer; font-size: 17.5px; }
+  .choice[aria-pressed="true"] { background: var(--accent-soft); }
   .choice[disabled] { cursor: default; color: var(--ink-2); }
   .choice .meta { font-size: 14px; color: var(--ink-2); white-space: nowrap; }
   .choice .meta.full { color: var(--danger); }
-  .tick { width: 22px; height: 22px; border-radius: 50%; background: var(--stamp); color: var(--stamp-ink); display: grid; place-items: center; font-size: 13px; opacity: 0; flex: none; }
+  .tick { width: 22px; height: 22px; border-radius: 50%; background: var(--accent); color: #fff; display: grid; place-items: center; font-size: 13px; opacity: 0; flex: none; }
+  .choice[aria-pressed="true"] .tick { opacity: 1; }
+
+  /* ===== الفورم ===== */
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-weight: 500; margin-bottom: 6px; font-size: 15.5px; }
+  .field input { width: 100%; padding: 13px 14px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--surface); font-size: 17px; }
+  .field input:focus { border-color: var(--brand); outline: none; box-shadow: 0 0 0 3px var(--brand-soft); }
+  .field input.ltr { direction: ltr; text-align: right; letter-spacing: 1px; }
+  .field .sub { font-size: 13px; color: var(--ink-2); margin-top: 4px; }
+  .switch { text-align: center; margin-top: 16px; font-size: 15px; color: var(--ink-2); }
+
+  .steps { display: flex; gap: 6px; margin: 0 0 20px; padding: 0; list-style: none; }
+  .steps li { flex: 1; font-size: 12.5px; color: var(--ink-2); }
+  .steps li::before { content: ""; display: block; height: 4px; border-radius: 2px; background: var(--line); margin-bottom: 6px; }
+  .steps li.done::before, .steps li.now::before { background: var(--accent); }
+  .steps li.now { color: var(--ink); font-weight: 700; }
 
   .docs { margin: 0 0 18px; padding: 14px 18px; background: var(--surface); border: 1px dashed var(--line); border-radius: 12px; font-size: 15px; }
   .docs strong { display: block; margin-bottom: 4px; }
   .docs ul { margin: 0; padding-inline-start: 20px; }
-
   .alert { padding: 12px 14px; border-radius: 10px; background: var(--danger-soft); color: var(--danger); font-size: 15px; margin: 0 0 16px; }
+  .info { padding: 12px 14px; border-radius: 10px; background: var(--brand-soft); font-size: 15px; margin: 0 0 16px; }
   .empty { padding: 22px 18px; text-align: center; color: var(--ink-2); background: var(--surface); border-radius: 14px; border: 1px solid var(--line); margin-bottom: 18px; }
-
-  .summary { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 6px 18px; margin: 0 0 18px; }
+  .summary { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 4px 18px; margin: 0 0 18px; }
   .summary div { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; }
   .summary div + div { border-top: 1px solid var(--line); }
   .summary span { color: var(--ink-2); }
 
-  /* ========== التذكرة ========== */
-  .ticket {
-    --notch: 14px;
-    position: relative; background: var(--surface); border-radius: 16px; margin: 0 0 18px;
-    border: 1px solid var(--line);
-  }
+  .profile { display: flex; align-items: center; gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 18px; margin-bottom: 18px; }
+  .avatar { width: 56px; height: 56px; border-radius: 50%; background: var(--brand); color: var(--brand-ink); display: grid; place-items: center; font-size: 22px; font-weight: 700; flex: none; }
+  .profile b { display: block; font-size: 18px; }
+  .profile span { color: var(--ink-2); font-size: 14px; }
+
+  /* ===== التذكرة ===== */
+  .ticket { --notch: 14px; position: relative; background: var(--surface); border-radius: 16px; margin: 0 0 18px; border: 1px solid var(--line); }
   .ticket .head { padding: 18px 20px 6px; }
   .ticket .city { font-size: 14px; color: var(--ink-2); }
   .ticket .service { font-size: 19px; font-weight: 700; }
   .ticket .numbers { display: grid; grid-template-columns: 1.3fr 1fr; padding: 8px 20px 18px; align-items: end; }
   .ticket .lbl { font-size: 14px; color: var(--ink-2); }
-  .ticket .big { font-size: 64px; font-weight: 700; line-height: 1; color: var(--stamp); }
+  .ticket .big { font-size: 64px; font-weight: 700; line-height: 1; color: var(--accent); }
   .ticket .mid { font-size: 40px; font-weight: 700; line-height: 1.05; }
   .ticket .date { padding: 0 20px 18px; font-weight: 500; }
-  .ticket .tear {
-    position: relative; height: 0; border-top: 2px dashed var(--line); margin: 0 var(--notch);
-  }
-  .ticket .tear::before, .ticket .tear::after {
-    content: ""; position: absolute; top: calc(var(--notch) * -1 - 1px); width: calc(var(--notch) * 2); height: calc(var(--notch) * 2);
-    border-radius: 50%; background: var(--paper); border: 1px solid var(--line);
-  }
+  .ticket .tear { position: relative; height: 0; border-top: 2px dashed var(--line); margin: 0 var(--notch); }
+  .ticket .tear::before, .ticket .tear::after { content: ""; position: absolute; top: calc(var(--notch) * -1 - 1px); width: calc(var(--notch) * 2); height: calc(var(--notch) * 2); border-radius: 50%; background: var(--paper); border: 1px solid var(--line); }
   .ticket .tear::before { right: calc(var(--notch) * -2); clip-path: inset(0 50% 0 0); }
   .ticket .tear::after { left: calc(var(--notch) * -2); clip-path: inset(0 0 0 50%); }
   .ticket .foot { display: flex; align-items: center; gap: 16px; padding: 18px 20px; }
@@ -158,59 +169,85 @@
   .ticket .codelbl { font-size: 13px; color: var(--ink-2); }
   .ticket.small .big { font-size: 40px; }
   .ticket.small .mid { font-size: 28px; }
-  .ticket.small .numbers { padding-bottom: 12px; }
-
   .confirm-pop { animation: pop .45s ease-out; }
   @keyframes pop { from { transform: translateY(10px) scale(.98); opacity: 0; } to { transform: none; opacity: 1; } }
-  @media (prefers-reduced-motion: reduce) { .confirm-pop { animation: none; } }
 
-  .note { font-size: 15px; color: var(--ink-2); margin: 0 0 18px; }
+  /* ===== الشريط اللي تحت ===== */
+  nav.tabs { position: fixed; bottom: 0; left: 0; right: 0; background: var(--surface); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); z-index: 10; }
+  nav.tabs .in { max-width: 520px; margin: 0 auto; display: grid; grid-template-columns: repeat(3, 1fr); }
+  nav.tabs a { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 9px 4px 10px; color: var(--ink-2); text-decoration: none; font-size: 12.5px; }
+  nav.tabs a[aria-current="page"] { color: var(--brand); font-weight: 700; }
+
   .spinner { display: inline-block; width: 18px; height: 18px; border: 2.5px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; vertical-align: -3px; margin-inline-end: 8px; }
   @keyframes spin { to { transform: rotate(360deg); } }
-  [hidden] { display: none !important; }
+  @media (prefers-reduced-motion: reduce) { .confirm-pop, .spinner { animation: none; } }
 </style>
 </head>
 <body>
-<div class="wrap">
-  <header class="top">
-    <p class="agency">هيئة المجتمعات العمرانية الجديدة</p>
-    <h1>احجز دورك في جهاز المدينة</h1>
-  </header>
-  <main id="app" aria-live="polite"></main>
-</div>
+<header class="topbar">
+  <div class="in">
+    <div class="logo" id="logo"><div class="mark" id="logo-mark"></div></div>
+    <div class="org"><b>هيئة المجتمعات العمرانية الجديدة</b><span>بوابة الخدمات الإلكترونية</span></div>
+  </div>
+</header>
+<main class="wrap" id="app" aria-live="polite"></main>
+<nav class="tabs" aria-label="التنقل">
+  <div class="in">
+    <a href="#/" data-tab="home"><span data-icon="home"></span>الرئيسية</a>
+    <a href="#/mine" data-tab="mine"><span data-icon="ticket"></span>حجوزاتي</a>
+    <a href="#/account" data-tab="account"><span data-icon="user"></span>حسابي</a>
+  </div>
+</nav>
 
 <script>
-// ===== حط هنا لينك الـ Web App اللي بيطلع من Apps Script بعد الـ Deploy =====
+// ===== لينك الـ Web App =====
 const API_URL = 'https://script.google.com/macros/s/AKfycbxjgX1FjxsbrFJyvWLOxcp8u6zaZVUZfQjG6O6fdBf04ePdzoNW1G--48qdSN9rU6Lwgg/exec';
 
+// ===== أقسام الخدمات (عدّل الأسماء من هنا) =====
+const CATEGORIES = [
+  { id: 'alloc', icon: 'contract', title: 'خدمات التخصيص والتعاقدات', services: [
+    'طلب تخصيص قطعة أرض أو وحدة', 'استكمال إجراءات التعاقد', 'طلب تنازل عن وحدة أو قطعة', 'الاستعلام عن الأقساط والمستحقات'] },
+  { id: 'build', icon: 'building', title: 'خدمات التراخيص والبناء', services: [
+    'طلب ترخيص بناء', 'طلب تعديل ترخيص', 'طلب معاينة موقع', 'طلب شهادة إتمام أعمال'] },
+  { id: 'utils', icon: 'bolt', title: 'خدمات المرافق والتوصيل', services: [
+    'طلب توصيل مياه', 'طلب توصيل صرف صحي', 'طلب توصيل كهرباء', 'طلب توصيل غاز طبيعي'] },
+  { id: 'legal', icon: 'scale', title: 'الخدمات العقارية والقانونية والإدارية', services: [
+    'طلب بيان حالة عقار', 'طلب صورة طبق الأصل من مستند', 'طلب التصالح في مخالفات البناء', 'طلب شهادة بيانات'] },
+  { id: 'follow', icon: 'search', title: 'خدمات المتابعة والاستعلام والشكاوى', services: [
+    'متابعة حالة طلب', 'تقديم شكوى', 'الاستعلام عن المخالفات', 'تقديم اقتراح'] },
+];
+
+const ICONS = {
+  calendar: '<svg class="i" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4M8 14h3M8 17h6"/></svg>',
+  contract: '<svg class="i" viewBox="0 0 24 24"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6M8 13h8M8 17h5"/></svg>',
+  building: '<svg class="i" viewBox="0 0 24 24"><path d="M4 21V8l6-4v17M10 21h10V11l-6-3"/><path d="M7 11v.01M7 14v.01M7 17v.01M14 13h2M14 17h2M2 21h20"/></svg>',
+  bolt: '<svg class="i" viewBox="0 0 24 24"><path d="M13 2 4 14h7l-1 8 9-12h-7z"/></svg>',
+  scale: '<svg class="i" viewBox="0 0 24 24"><path d="M12 3v18M7 21h10M5 7h14M5 7l-3 7a3 3 0 0 0 6 0zM19 7l-3 7a3 3 0 0 0 6 0z"/></svg>',
+  search: '<svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></svg>',
+  lock: '<svg class="i" viewBox="0 0 24 24"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>',
+  chev: '<svg class="i chev" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>',
+  home: '<svg class="i" viewBox="0 0 24 24"><path d="M3 11 12 4l9 7M5 10v10h14V10"/></svg>',
+  ticket: '<svg class="i" viewBox="0 0 24 24"><path d="M3 8a2 2 0 0 0 2-2h14a2 2 0 0 0 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 0-2 2H5a2 2 0 0 0-2-2v-2a2 2 0 0 0 0-4z"/><path d="M14 6v12" stroke-dasharray="2 2"/></svg>',
+  user: '<svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
+  city: '<svg class="i" viewBox="0 0 24 24" style="width:26px;height:26px"><path d="M3 21V10l5-3v14M8 21h8V4l5 3v14M11 8h2M11 12h2M11 16h2M2 21h20"/></svg>',
+};
+document.querySelectorAll('[data-icon]').forEach((el) => { el.outerHTML = ICONS[el.dataset.icon]; });
+
+// لوجو الهيئة: لو ملف icons/logo.png موجود يظهر، ولو مش موجود تفضل العلامة البديلة
+document.getElementById('logo-mark').innerHTML = ICONS.city;
+(() => { const img = new Image(); img.alt = 'شعار الهيئة';
+  img.onload = () => { const box = document.getElementById('logo'); box.innerHTML = ''; box.appendChild(img); };
+  img.src = 'icons/logo.png'; })();
+
 const STEPS = ['الرقم القومي', 'المدينة', 'الخدمة', 'اليوم'];
-const state = { config: null, nid: '', cityId: '', serviceId: '', date: '', days: [] };
-const avail = {}; // cityId -> Promise لأيام كل خدمات المدينة
-
-// بنجيب أيام كل خدمات المدينة مرة واحدة أول ما تتختار
-function loadCityAvail(cityId, force) {
-  if (force || !avail[cityId]) {
-    avail[cityId] = api('cityAvailability', { cityId }).catch((e) => { delete avail[cityId]; throw e; });
-  }
-  return avail[cityId];
-}
-
-// حفظ المدن والخدمات على الجهاز علشان الفتح يبقى فوري
-const CFG_KEY = 'cb_config_v1';
-function readCachedConfig() {
-  try { const c = JSON.parse(localStorage.getItem(CFG_KEY)); return c && c.data && Array.isArray(c.data.cities) ? c.data : null; } catch (_) { return null; }
-}
-function writeCachedConfig(data) {
-  try { localStorage.setItem(CFG_KEY, JSON.stringify({ t: Date.now(), data })); } catch (_) {}
-}
+const state = { config: null, nid: '', cityId: '', serviceId: '', date: '', days: [], next: '' };
 const app = document.getElementById('app');
+const avail = {};
 
-// ---------- أدوات ----------
+// ---------- الاتصال بالسيرفر ----------
 async function api(action, payload) {
-  if (API_URL.startsWith('PUT_')) throw new Error('لينك السيستم لسه متحطش في الصفحة');
   let res;
   try {
-    // من غير Content-Type مخصوص علشان المتصفح ميبعتش طلب OPTIONS
     res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(Object.assign({ action }, payload)) });
   } catch (_) {
     throw new Error('مفيش اتصال بالإنترنت، اتأكد من النت وحاول تاني');
@@ -220,17 +257,37 @@ async function api(action, payload) {
   return j.data;
 }
 
+function loadCityAvail(cityId, force) {
+  if (force || !avail[cityId]) avail[cityId] = api('cityAvailability', { cityId }).catch((e) => { delete avail[cityId]; throw e; });
+  return avail[cityId];
+}
+
+// ---------- التخزين على الجهاز ----------
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (_) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (_) {} },
+};
+const SESSION_KEY = 'nuca_session_v1';
+const CFG_KEY = 'cb_config_v1';
+let session = store.get(SESSION_KEY); // { token, user, nid }
+function setSession(s) { session = s; s ? store.set(SESSION_KEY, s) : store.del(SESSION_KEY); }
+
+// ---------- أدوات ----------
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const arNum = (n) => Number(n).toLocaleString('ar-EG');
 const fmtDay = (d) => new Intl.DateTimeFormat('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' }).format(new Date(d + 'T00:00:00Z'));
 const city = () => state.config.cities.find((c) => c.id === state.cityId);
 const service = () => city()?.services.find((s) => s.id === state.serviceId);
+const alertBox = (msg) => msg ? `<p class="alert" role="alert">${esc(msg)}</p>` : '';
+const backBtn = (label = 'رجوع') => `<button class="back" id="back">${ICONS.chev}${label}</button>`;
+function busy(btn, text) { btn.disabled = true; btn.dataset.label = btn.innerHTML; btn.innerHTML = `<span class="spinner"></span>${text}`; }
+function idle(btn) { btn.disabled = false; btn.innerHTML = btn.dataset.label; }
+function focusTop() { window.scrollTo({ top: 0 }); app.querySelector('h2')?.focus({ preventScroll: true }); }
+function go(hash) { if (location.hash === hash) route(); else location.hash = hash; }
 
 function normalizeDigits(raw) {
-  return String(raw ?? '')
-    .replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d)))
-    .replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d)))
-    .replace(/\D/g, '');
+  return String(raw ?? '').replace(/[٠-٩]/g, (d) => String('٠١٢٣٤٥٦٧٨٩'.indexOf(d))).replace(/[۰-۹]/g, (d) => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(d))).replace(/\D/g, '');
 }
 const GOV = ['01','02','03','04','11','12','13','14','15','16','17','18','19','21','22','23','24','25','26','27','28','29','31','32','33','34','35','88'];
 function nidError(nid) {
@@ -243,134 +300,259 @@ function nidError(nid) {
   return '';
 }
 
-function stepsBar(i) {
-  return '<ol class="steps">' + STEPS.map((s, k) =>
-    `<li class="${k < i ? 'done' : k === i ? 'now' : ''}"${k === i ? ' aria-current="step"' : ''}>${s}</li>`).join('') + '</ol>';
+// ---------- التنقل ----------
+function setTab(tab) {
+  document.querySelectorAll('nav.tabs a').forEach((a) => {
+    if (a.dataset.tab === tab) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+  });
 }
-const alertBox = (msg) => msg ? `<p class="alert" role="alert">${esc(msg)}</p>` : '';
-function busy(btn, text) { btn.disabled = true; btn.dataset.label = btn.innerHTML; btn.innerHTML = `<span class="spinner"></span>${text}`; }
-function idle(btn) { btn.disabled = false; btn.innerHTML = btn.dataset.label; }
-function focusTitle() { app.querySelector('h2')?.focus({ preventScroll: true }); window.scrollTo({ top: 0, behavior: 'smooth' }); }
 
-// ---------- الشاشات ----------
-function showHome(msg) {
+function route() {
+  const [path, arg] = location.hash.replace(/^#\/?/, '').split('/');
+  if (path === 'cat') { setTab('home'); return requireLogin('#/cat/' + arg) && showCategory(arg); }
+  if (path === 'book') { setTab('home'); return startBooking(); }
+  if (path === 'mine') { setTab('mine'); return session ? loadMine() : showNid('mine'); }
+  if (path === 'account') { setTab('account'); return session ? showAccount() : showLogin(); }
+  if (path === 'login') { setTab('account'); return showLogin(); }
+  if (path === 'register') { setTab('account'); return showRegister(); }
+  setTab('home'); showHome();
+}
+window.addEventListener('hashchange', route);
+
+function requireLogin(next) {
+  if (session) return true;
+  state.next = next;
+  showLogin('الخدمة دي محتاجة تسجيل دخول. لو معندكش حساب، اعمل واحد في دقيقة.');
+  return false;
+}
+function afterLogin() { const n = state.next || '#/'; state.next = ''; go(n); }
+
+// ---------- الرئيسية ----------
+function showHome() {
   app.innerHTML = `
+    <button class="hero" id="book">
+      <span class="ic">${ICONS.calendar}</span>
+      <span><b>احجز ميعاد بمركز خدمات المواطنين التابع لك</b><span>متاح للجميع من غير تسجيل دخول</span></span>
+      <span class="go">${ICONS.chev}</span>
+    </button>
+    <h3>خدمات الهيئة</h3>
+    ${session ? '' : `<div class="signin-note"><span>سجل دخول علشان تستخدم الخدمات</span><button class="link" id="signin">دخول</button></div>`}
+    <ul class="list">
+      ${CATEGORIES.map((c) => `
+        <li><button class="row" data-cat="${c.id}">
+          <span class="ic">${ICONS[c.icon]}</span>
+          <span class="tx">${esc(c.title)}<small>${arNum(c.services.length)} خدمات</small></span>
+          <span class="end">${session ? ICONS.chev : ICONS.lock}</span>
+        </button></li>`).join('')}
+    </ul>`;
+  document.getElementById('book').onclick = () => go('#/book');
+  document.getElementById('signin')?.addEventListener('click', () => go('#/login'));
+  app.querySelectorAll('[data-cat]').forEach((b) => b.onclick = () => go('#/cat/' + b.dataset.cat));
+}
+
+function showCategory(id) {
+  const c = CATEGORIES.find((x) => x.id === id);
+  if (!c) return go('#/');
+  app.innerHTML = `
+    ${backBtn('الرئيسية')}
+    <h2 tabindex="-1">${esc(c.title)}</h2>
+    <p class="hint">الخدمات دي هتبقى متاحة أونلاين قريب. لحد ما تتفعّل، تقدر تحجز ميعاد في جهاز المدينة.</p>
+    <ul class="list">
+      ${c.services.map((s) => `<li><div class="row" aria-disabled="true"><span class="tx">${esc(s)}</span><span class="pill">قريبًا</span></div></li>`).join('')}
+    </ul>
+    <button class="btn" id="book">${ICONS.calendar}احجز ميعاد بمركز خدمات المواطنين التابع لك</button>`;
+  document.getElementById('back').onclick = () => go('#/');
+  document.getElementById('book').onclick = () => go('#/book');
+  focusTop();
+}
+
+// ---------- الحساب ----------
+function showLogin(reason, msg) {
+  app.innerHTML = `
+    <h2 tabindex="-1">تسجيل الدخول</h2>
+    <p class="hint">ادخل بالرقم القومي وكلمة السر.</p>
+    ${reason ? `<p class="info">${esc(reason)}</p>` : ''}
     ${alertBox(msg)}
-    <div class="home-actions">
-      <button class="btn" id="go-book">احجز ميعاد<small>اختار المدينة والخدمة واليوم</small></button>
-      <button class="btn quiet" id="go-mine">حجوزاتي<small>شوف أو الغي حجز عملته</small></button>
-    </div>`;
-  document.getElementById('go-book').onclick = () => { Object.assign(state, { cityId: '', serviceId: '', date: '' }); showNid('book'); };
-  document.getElementById('go-mine').onclick = () => showNid('mine');
+    <div class="field"><label for="nid">الرقم القومي</label><input class="ltr" id="nid" inputmode="numeric" autocomplete="username" maxlength="20" value="${esc(state.nid)}"></div>
+    <div class="field"><label for="pw">كلمة السر</label><input class="ltr" id="pw" type="password" autocomplete="current-password"></div>
+    <button class="btn" id="go">دخول</button>
+    <p class="switch">معندكش حساب؟ <button class="link" id="reg">اعمل حساب جديد</button></p>`;
+  const nidEl = document.getElementById('nid'), pwEl = document.getElementById('pw');
+  (nidEl.value ? pwEl : nidEl).focus();
+  document.getElementById('reg').onclick = () => go('#/register');
+  const submit = async () => {
+    const nid = normalizeDigits(nidEl.value);
+    const err = nidError(nid);
+    if (err) return showLogin(reason, err);
+    if (!pwEl.value) return showLogin(reason, 'اكتب كلمة السر');
+    state.nid = nid;
+    const btn = document.getElementById('go'); busy(btn, 'جاري الدخول');
+    try {
+      const r = await api('citizenLogin', { nationalId: nid, password: pwEl.value });
+      setSession({ token: r.token, user: r.user, nid });
+      afterLogin();
+    } catch (e) { showLogin(reason, e.message); }
+  };
+  document.getElementById('go').onclick = submit;
+  pwEl.onkeydown = (e) => { if (e.key === 'Enter') submit(); };
+}
+
+function showRegister(msg, vals = {}) {
+  app.innerHTML = `
+    ${backBtn()}
+    <h2 tabindex="-1">حساب جديد</h2>
+    <p class="hint">حساب واحد لكل رقم قومي.</p>
+    ${alertBox(msg)}
+    <div class="field"><label for="name">الاسم (ثلاثي على الأقل)</label><input id="name" autocomplete="name" value="${esc(vals.name)}"></div>
+    <div class="field"><label for="nid">الرقم القومي</label><input class="ltr" id="nid" inputmode="numeric" autocomplete="username" maxlength="20" value="${esc(vals.nid || state.nid)}"></div>
+    <div class="field"><label for="phone">رقم الموبايل</label><input class="ltr" id="phone" inputmode="tel" autocomplete="tel" maxlength="15" placeholder="01xxxxxxxxx" value="${esc(vals.phone)}"></div>
+    <div class="field"><label for="pw">كلمة السر</label><input class="ltr" id="pw" type="password" autocomplete="new-password"><div class="sub">٦ حروف أو أرقام على الأقل</div></div>
+    <div class="field"><label for="pw2">تأكيد كلمة السر</label><input class="ltr" id="pw2" type="password" autocomplete="new-password"></div>
+    <button class="btn" id="go">إنشاء الحساب</button>
+    <p class="switch">عندك حساب؟ <button class="link" id="login">سجل دخول</button></p>`;
+  document.getElementById('back').onclick = () => history.back();
+  document.getElementById('login').onclick = () => go('#/login');
+  document.getElementById('go').onclick = async () => {
+    const v = {
+      name: document.getElementById('name').value.trim(),
+      nid: normalizeDigits(document.getElementById('nid').value),
+      phone: normalizeDigits(document.getElementById('phone').value),
+    };
+    const pw = document.getElementById('pw').value, pw2 = document.getElementById('pw2').value;
+    if (v.name.split(/\s+/).length < 3) return showRegister('اكتب اسمك ثلاثي على الأقل', v);
+    const err = nidError(v.nid); if (err) return showRegister(err, v);
+    if (!/^01[0125]\d{8}$/.test(v.phone)) return showRegister('رقم الموبايل لازم يكون ١١ رقم ويبدأ بـ 010 أو 011 أو 012 أو 015', v);
+    if (pw.length < 6) return showRegister('كلمة السر لازم ٦ حروف على الأقل', v);
+    if (pw !== pw2) return showRegister('كلمتين السر مش زي بعض', v);
+    const btn = document.getElementById('go'); busy(btn, 'جاري إنشاء الحساب');
+    try {
+      const r = await api('register', { name: v.name, nationalId: v.nid, phone: v.phone, password: pw });
+      setSession({ token: r.token, user: r.user, nid: v.nid });
+      state.nid = v.nid;
+      afterLogin();
+    } catch (e) { showRegister(e.message, v); }
+  };
+  focusTop();
+}
+
+function showAccount() {
+  const u = session.user;
+  app.innerHTML = `
+    <h2 tabindex="-1">حسابي</h2>
+    <div class="profile" style="margin-top:14px">
+      <div class="avatar">${esc((u.name || '؟').trim()[0])}</div>
+      <div><b>${esc(u.name)}</b><span>الرقم القومي: <bdi dir="ltr">${esc(u.nidMasked)}</bdi></span><br><span>الموبايل: <bdi dir="ltr">${esc(u.phone)}</bdi></span></div>
+    </div>
+    <ul class="list">
+      <li><button class="row" id="mine"><span class="ic">${ICONS.ticket}</span><span class="tx">حجوزاتي</span><span class="end">${ICONS.chev}</span></button></li>
+      <li><button class="row" id="book"><span class="ic">${ICONS.calendar}</span><span class="tx">احجز ميعاد</span><span class="end">${ICONS.chev}</span></button></li>
+    </ul>
+    <button class="btn quiet" id="out">تسجيل خروج</button>`;
+  document.getElementById('mine').onclick = () => go('#/mine');
+  document.getElementById('book').onclick = () => go('#/book');
+  document.getElementById('out').onclick = () => { setSession(null); state.nid = ''; go('#/'); };
+}
+
+// ---------- الحجز ----------
+function stepsBar(i) {
+  return '<ol class="steps">' + STEPS.map((s, k) => `<li class="${k < i ? 'done' : k === i ? 'now' : ''}"${k === i ? ' aria-current="step"' : ''}>${s}</li>`).join('') + '</ol>';
+}
+
+function startBooking() {
+  Object.assign(state, { cityId: '', serviceId: '', date: '' });
+  if (session) { state.nid = session.nid; return showCity(); }
+  showNid('book');
 }
 
 function showNid(mode, msg) {
   const forBook = mode === 'book';
   app.innerHTML = `
-    <button class="back" id="back">رجوع</button>
+    ${backBtn()}
     ${forBook ? stepsBar(0) : ''}
     <h2 tabindex="-1">${forBook ? 'اكتب رقمك القومي' : 'حجوزاتي'}</h2>
-    <p class="hint">${forBook ? 'الحجز باسم صاحب البطاقة، والموظف هيراجع البطاقة الأصلية على الشباك.' : 'اكتب الرقم القومي اللي حجزت بيه.'}</p>
+    <p class="hint">${forBook ? 'الحجز باسم صاحب البطاقة، والموظف هيراجع البطاقة الأصلية على الشباك.' : 'اكتب الرقم القومي اللي حجزت بيه، أو سجل دخول.'}</p>
     ${alertBox(msg)}
-    <label class="field" for="nid">الرقم القومي (١٤ رقم)</label>
-    <input class="nid" id="nid" inputmode="numeric" autocomplete="off" maxlength="20" value="${esc(state.nid)}" placeholder="2xxxxxxxxxxxxx">
-    <div class="count" id="count"></div>
+    <div class="field"><label for="nid">الرقم القومي (١٤ رقم)</label><input class="ltr" id="nid" inputmode="numeric" autocomplete="off" maxlength="20" value="${esc(state.nid)}" style="font-size:22px;text-align:center"></div>
     <button class="btn" id="next">${forBook ? 'التالي' : 'اعرض حجوزاتي'}</button>`;
-  const input = document.getElementById('nid'), count = document.getElementById('count');
-  const upd = () => { count.textContent = normalizeDigits(input.value).length + ' / 14'; };
-  input.oninput = upd; upd(); input.focus();
-  document.getElementById('back').onclick = () => showHome();
-  const go = async () => {
+  const input = document.getElementById('nid'); input.focus();
+  document.getElementById('back').onclick = () => go('#/');
+  const submit = async () => {
     const nid = normalizeDigits(input.value);
     const err = nidError(nid);
     if (err) return showNid(mode, err);
     state.nid = nid;
     if (forBook) return showCity();
     const btn = document.getElementById('next'); busy(btn, 'جاري البحث');
-    try { showMine(await api('myBookings', { nationalId: nid })); }
-    catch (e) { showNid(mode, e.message); }
+    try { showMine(await api('myBookings', { nationalId: nid })); } catch (e) { showNid(mode, e.message); }
   };
-  document.getElementById('next').onclick = go;
-  input.onkeydown = (e) => { if (e.key === 'Enter') go(); };
+  document.getElementById('next').onclick = submit;
+  input.onkeydown = (e) => { if (e.key === 'Enter') submit(); };
 }
 
 function choiceList(items, selectedId) {
-  return '<ul class="choices">' + items.map((it) => `
+  return '<ul class="list">' + items.map((it) => `
     <li><button class="choice" data-id="${esc(it.id)}" aria-pressed="${it.id === selectedId}" ${it.disabled ? 'disabled' : ''}>
       <span>${esc(it.label)}</span>
       ${it.meta ? `<span class="meta ${it.full ? 'full' : ''}">${esc(it.meta)}</span>` : '<span class="tick" aria-hidden="true">✓</span>'}
     </button></li>`).join('') + '</ul>';
 }
 
-function showCity() {
+async function ensureConfig() {
+  if (state.config) return true;
+  app.innerHTML = '<div class="empty"><span class="spinner"></span>جاري التحميل</div>';
+  try { await configReady; return true; } catch (e) { app.innerHTML = alertBox(e.message); return false; }
+}
+
+async function showCity() {
+  if (!(await ensureConfig())) return;
   const cities = state.config.cities;
   app.innerHTML = `
-    <button class="back" id="back">رجوع</button>
+    ${backBtn()}
     ${stepsBar(1)}
     <h2 tabindex="-1">اختار جهاز المدينة</h2>
     <p class="hint">الجهاز اللي هتروحله يوم الميعاد.</p>
-    ${cities.length ? choiceList(cities.map((c) => ({ id: c.id, label: c.name })), state.cityId)
-      : '<div class="empty">مفيش أجهزة متاحة للحجز دلوقتي.</div>'}`;
-  document.getElementById('back').onclick = () => showNid('book');
+    ${cities.length ? choiceList(cities.map((c) => ({ id: c.id, label: 'جهاز مدينة ' + c.name })), state.cityId) : '<div class="empty">مفيش أجهزة متاحة للحجز دلوقتي.</div>'}`;
+  document.getElementById('back').onclick = () => (session ? go('#/') : showNid('book'));
   app.querySelectorAll('.choice').forEach((b) => b.onclick = () => {
     if (state.cityId !== b.dataset.id) state.serviceId = '';
     state.cityId = b.dataset.id;
     loadCityAvail(state.cityId).catch(() => {});
     showService();
   });
-  focusTitle();
+  focusTop();
 }
 
 function showService() {
-  const svcs = city().services;
   app.innerHTML = `
-    <button class="back" id="back">رجوع</button>
+    ${backBtn()}
     ${stepsBar(2)}
     <h2 tabindex="-1">اختار الخدمة</h2>
-    <p class="hint">جهاز ${esc(city().name)}</p>
-    ${choiceList(svcs.map((s) => ({ id: s.id, label: s.name })), state.serviceId)}`;
+    <p class="hint">جهاز مدينة ${esc(city().name)}</p>
+    ${choiceList(city().services.map((s) => ({ id: s.id, label: s.name })), state.serviceId)}`;
   document.getElementById('back').onclick = showCity;
   app.querySelectorAll('.choice').forEach((b) => b.onclick = () => { state.serviceId = b.dataset.id; state.date = ''; showDays(); });
-  focusTitle();
+  focusTop();
 }
 
-function docsBox(docs) {
-  if (!docs || !docs.length) return '';
-  return `<div class="docs"><strong>هات معاك يوم الميعاد</strong><ul>${docs.map((d) => `<li>${esc(d)}</li>`).join('')}</ul></div>`;
-}
+const docsBox = (docs) => docs && docs.length ? `<div class="docs"><strong>هات معاك يوم الميعاد</strong><ul>${docs.map((d) => `<li>${esc(d)}</li>`).join('')}</ul></div>` : '';
+const daysHead = (msg) => `${backBtn()}${stepsBar(3)}<h2 tabindex="-1">اختار اليوم</h2><p class="hint">${esc(service().name)} · جهاز مدينة ${esc(city().name)}</p>${alertBox(msg)}`;
 
 async function showDays(msg) {
-  app.innerHTML = `
-    <button class="back" id="back">رجوع</button>
-    ${stepsBar(3)}
-    <h2 tabindex="-1">اختار اليوم</h2>
-    <p class="hint">${esc(service().name)} · جهاز ${esc(city().name)}</p>
-    ${alertBox(msg)}
-    <div class="empty"><span class="spinner"></span>بنجيب الأيام المتاحة</div>`;
+  app.innerHTML = daysHead(msg) + '<div class="empty"><span class="spinner"></span>بنجيب الأيام المتاحة</div>';
   document.getElementById('back').onclick = showService;
-  focusTitle();
+  focusTop();
   try {
     const { services } = await loadCityAvail(state.cityId, !!msg);
     state.days = services[state.serviceId] || [];
     renderDays(msg);
-  } catch (e) {
-    app.querySelector('.empty').outerHTML = alertBox(e.message);
-  }
+  } catch (e) { app.querySelector('.empty').outerHTML = alertBox(e.message); }
 }
 
 function renderDays(msg) {
-  const days = state.days;
-  const open = days.filter((d) => d.remaining !== 0);
-  const items = days.map((d) => ({
-    id: d.date, label: fmtDay(d.date), disabled: d.remaining === 0, full: d.remaining === 0,
-    meta: d.remaining === 0 ? 'اكتمل' : d.remaining === null ? 'متاح' : `باقي ${arNum(d.remaining)} مكان`,
-  }));
-  app.innerHTML = `
-    <button class="back" id="back">رجوع</button>
-    ${stepsBar(3)}
-    <h2 tabindex="-1">اختار اليوم</h2>
-    <p class="hint">${esc(service().name)} · جهاز ${esc(city().name)}</p>
-    ${alertBox(msg)}
+  const days = state.days, open = days.filter((d) => d.remaining !== 0);
+  const items = days.map((d) => ({ id: d.date, label: fmtDay(d.date), disabled: d.remaining === 0, full: d.remaining === 0,
+    meta: d.remaining === 0 ? 'اكتمل' : d.remaining === null ? 'متاح' : `باقي ${arNum(d.remaining)} مكان` }));
+  app.innerHTML = daysHead(msg) + `
     ${open.length ? choiceList(items, state.date) : '<div class="empty">كل الأيام المتاحة اكتملت. جرّب تاني بكرة، بيتفتح يوم جديد كل يوم.</div>'}
     ${state.date ? `
       <div class="summary">
@@ -379,7 +561,7 @@ function renderDays(msg) {
         <div><span>اليوم</span><b>${esc(fmtDay(state.date))}</b></div>
       </div>
       ${docsBox(service().requiredDocs)}
-      <button class="btn" id="confirm">أكّد الحجز</button>` : ''}`;
+      <button class="btn" id="confirm" style="background:var(--accent)">أكّد الحجز</button>` : ''}`;
   document.getElementById('back').onclick = showService;
   app.querySelectorAll('.choice').forEach((b) => b.onclick = () => {
     state.date = b.dataset.id; renderDays();
@@ -392,20 +574,14 @@ function renderDays(msg) {
       const b = await api('book', { nationalId: state.nid, cityId: state.cityId, serviceId: state.serviceId, date: state.date });
       delete avail[state.cityId];
       showTicket(b);
-    } catch (e) {
-      state.date = '';
-      showDays(e.message);
-    }
+    } catch (e) { state.date = ''; showDays(e.message); }
   };
 }
 
 function ticketHtml(b, small) {
   return `
     <article class="ticket ${small ? 'small' : 'confirm-pop'}" aria-label="تذكرة الحجز">
-      <div class="head">
-        <div class="city">جهاز ${esc(b.cityName)}</div>
-        <div class="service">${esc(b.serviceName)}</div>
-      </div>
+      <div class="head"><div class="city">جهاز مدينة ${esc(b.cityName)}</div><div class="service">${esc(b.serviceName)}</div></div>
       <div class="numbers">
         <div><div class="lbl">رقم دورك</div><div class="big">${arNum(b.seq)}</div></div>
         <div>${b.window ? `<div class="lbl">الشباك</div><div class="mid">${/^\d+$/.test(b.window) ? arNum(b.window) : esc(b.window)}</div>` : ''}</div>
@@ -414,11 +590,7 @@ function ticketHtml(b, small) {
       <div class="tear" aria-hidden="true"></div>
       <div class="foot">
         <div class="qr" data-code="${esc(b.code)}"></div>
-        <div>
-          <div class="codelbl">كود الحجز</div>
-          <div class="code">${esc(b.code)}</div>
-          <div class="codelbl">البطاقة: <bdi dir="ltr">${esc(b.nidMasked)}</bdi></div>
-        </div>
+        <div><div class="codelbl">كود الحجز</div><div class="code">${esc(b.code)}</div><div class="codelbl">البطاقة: <bdi dir="ltr">${esc(b.nidMasked)}</bdi></div></div>
       </div>
     </article>`;
 }
@@ -426,7 +598,7 @@ function ticketHtml(b, small) {
 function drawQrs(size) {
   app.querySelectorAll('.qr[data-code]').forEach((el) => {
     if (window.QRCode) new QRCode(el, { text: el.dataset.code, width: size, height: size, correctLevel: QRCode.CorrectLevel.M });
-    else el.remove(); // لو مكتبة الـ QR ماحملتش، الكود مكتوب كفاية
+    else el.remove();
   });
 }
 
@@ -439,62 +611,51 @@ function showTicket(b) {
     <button class="btn" id="home">تمام</button>
     <button class="btn quiet" id="mine">حجوزاتي</button>`;
   drawQrs(112);
-  document.getElementById('home').onclick = () => showHome();
-  document.getElementById('mine').onclick = async (e) => {
-    busy(e.currentTarget, 'جاري التحميل');
-    try { showMine(await api('myBookings', { nationalId: state.nid })); } catch (err) { showHome(err.message); }
-  };
-  focusTitle();
+  document.getElementById('home').onclick = () => go('#/');
+  document.getElementById('mine').onclick = () => (session ? go('#/mine') : loadMine(true));
+  focusTop();
+}
+
+async function loadMine(useState) {
+  const nid = session ? session.nid : state.nid;
+  app.innerHTML = '<h2 tabindex="-1">حجوزاتي</h2><div class="empty" style="margin-top:14px"><span class="spinner"></span>جاري التحميل</div>';
+  try { showMine(await api('myBookings', { nationalId: nid })); }
+  catch (e) { app.innerHTML = '<h2>حجوزاتي</h2>' + alertBox(e.message); }
 }
 
 function showMine({ bookings = [] } = {}, msg) {
   app.innerHTML = `
-    <button class="back" id="back">الرئيسية</button>
     <h2 tabindex="-1">حجوزاتي</h2>
     <p class="hint">الحجوزات اللي لسه ميعادها مجاش. تقدر تحجز ٣ خدمات مختلفة بحد أقصى.</p>
     ${alertBox(msg)}
-    ${bookings.length ? bookings.map((b) => `
-      ${ticketHtml(b, true)}
-      <button class="btn quiet cancel" data-code="${esc(b.code)}" style="margin:-8px 0 22px">الغي الحجز ده</button>`).join('')
-      : '<div class="empty">مفيش حجوزات قائمة على الرقم ده.</div>'}
-    <button class="btn" id="new">احجز ميعاد جديد</button>`;
+    ${bookings.length ? bookings.map((b) => `${ticketHtml(b, true)}<button class="btn quiet cancel" data-code="${esc(b.code)}" style="margin:-8px 0 22px">الغي الحجز ده</button>`).join('')
+      : '<div class="empty">مفيش حجوزات قائمة.</div>'}
+    <button class="btn" id="new">${ICONS.calendar}احجز ميعاد جديد</button>`;
   drawQrs(84);
-  document.getElementById('back').onclick = () => showHome();
-  document.getElementById('new').onclick = () => { Object.assign(state, { cityId: '', serviceId: '', date: '' }); showCity(); };
+  document.getElementById('new').onclick = () => go('#/book');
   app.querySelectorAll('.cancel').forEach((btn) => btn.onclick = async () => {
     if (!confirm('متأكد إنك عايز تلغي الحجز ' + btn.dataset.code + '؟ مكانك هيروح لحد تاني.')) return;
     busy(btn, 'جاري الإلغاء');
-    try {
-      await api('cancel', { nationalId: state.nid, code: btn.dataset.code });
-      showMine(await api('myBookings', { nationalId: state.nid }));
-    } catch (e) {
-      idle(btn);
-      showMine({ bookings }, e.message);
-    }
+    const nid = session ? session.nid : state.nid;
+    try { await api('cancel', { nationalId: nid, code: btn.dataset.code }); showMine(await api('myBookings', { nationalId: nid })); }
+    catch (e) { idle(btn); showMine({ bookings }, e.message); }
   });
-  focusTitle();
+  focusTop();
 }
 
 // ---------- البداية ----------
-(async function init() {
-  const cached = readCachedConfig();
-  const fresh = api('config', {}).then((data) => { state.config = data; writeCachedConfig(data); return data; });
-  if (cached) {
-    state.config = cached;
-    showHome();
-    fresh.catch(() => {}); // لو التحديث فشل نكمل باللي محفوظ
-    return;
-  }
-  app.innerHTML = '<div class="empty"><span class="spinner"></span>جاري التحميل، أول مرة بتاخد ثواني</div>';
-  try {
-    await fresh;
-    showHome();
-  } catch (e) {
-    app.innerHTML = alertBox(e.message) + '<button class="btn" onclick="location.reload()">حاول تاني</button>';
-  }
-})();
+const cachedCfg = store.get(CFG_KEY);
+if (cachedCfg && cachedCfg.data && Array.isArray(cachedCfg.data.cities)) state.config = cachedCfg.data;
+const configReady = api('config', {}).then((data) => { state.config = data; store.set(CFG_KEY, { t: Date.now(), data }); return data; });
+configReady.catch(() => {});
 
-// تشغيل الـ Service Worker (بيشتغل بس على https، مش من ملف على الجهاز)
+// نتأكد إن الجلسة لسه صالحة في الخلفية
+if (session) api('citizenMe', { token: session.token })
+  .then((r) => setSession(Object.assign({}, session, { user: r.user })))
+  .catch((e) => { if (/سجل دخول/.test(e.message)) { setSession(null); route(); } });
+
+route();
+
 if ('serviceWorker' in navigator && location.protocol === 'https:') {
   window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
 }
