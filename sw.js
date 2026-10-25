@@ -1,6 +1,6 @@
 // بيخلي الصفحة تفتح حتى لو النت ضعيف أو مقطوع، وبيجيب أحدث نسخة لما النت يبقى متاح.
 // طلبات السيرفر (script.google.com) مبتتخزنش أبدًا.
-const CACHE = 'cb-shell-v3';
+const CACHE = 'cb-shell-v4';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/logo.png'];
 
 self.addEventListener('install', (e) => {

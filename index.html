@@ -63,7 +63,7 @@
     font-size: 17px; line-height: 1.6;
     padding-top: env(safe-area-inset-top, 0px);
   }
-  button, input { font: inherit; color: inherit; }
+  button, input, select { font: inherit; color: inherit; }
   :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
   [hidden] { display: none !important; }
   svg.i { width: 24px; height: 24px; flex: none; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
@@ -131,6 +131,12 @@
   .field input { width: 100%; padding: 13px 14px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--surface); font-size: 17px; }
   .field input:focus { border-color: var(--brand); outline: none; box-shadow: 0 0 0 3px var(--brand-soft); }
   .field input.ltr { direction: ltr; text-align: right; letter-spacing: 1px; }
+  .field select { width: 100%; padding: 13px 14px; padding-inline-end: 40px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--surface); color: var(--ink); font: inherit; font-size: 17px;
+    appearance: none; -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%235A6670' stroke-width='2.2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+    background-position: left 12px center; background-size: 20px 20px; background-repeat: no-repeat; text-overflow: ellipsis; }
+  .field select:focus { border-color: var(--brand); outline: none; box-shadow: 0 0 0 3px var(--brand-soft); }
+  .field select:disabled { opacity: .6; }
   .field .sub { font-size: 13px; color: var(--ink-2); margin-top: 4px; }
   .switch { text-align: center; margin-top: 16px; font-size: 15px; color: var(--ink-2); }
 
@@ -161,7 +167,8 @@
   .ticket .head { padding: 18px 20px 6px; }
   .ticket .city { font-size: 14px; color: var(--ink-2); }
   .ticket .service { font-size: 19px; font-weight: 700; }
-  .ticket .numbers { display: grid; grid-template-columns: 1.3fr 1fr; padding: 8px 20px 18px; align-items: end; }
+  .ticket .numbers { display: grid; grid-template-columns: auto 1fr; gap: 18px; padding: 8px 20px 18px; align-items: end; }
+  .ticket .kiosk { font-size: 13.5px; color: var(--ink-2); line-height: 1.5; padding-bottom: 6px; }
   .ticket .lbl { font-size: 14px; color: var(--ink-2); }
   .ticket .big { font-size: 64px; font-weight: 700; line-height: 1; color: var(--accent); }
   .ticket .mid { font-size: 40px; font-weight: 700; line-height: 1.05; }
@@ -255,7 +262,7 @@ const ICONS = {
 document.querySelectorAll('[data-icon]').forEach((el) => { el.outerHTML = ICONS[el.dataset.icon]; });
 
 
-const STEPS = ['الرقم القومي', 'المدينة', 'الخدمة', 'اليوم'];
+const STEPS = ['الرقم القومي', 'المدينة والخدمة', 'اليوم'];
 const state = { config: null, nid: '', cityId: '', serviceId: '', date: '', days: [], next: '' };
 const app = document.getElementById('app');
 const avail = {};
@@ -285,7 +292,7 @@ const store = {
   del(k) { try { localStorage.removeItem(k); } catch (_) {} },
 };
 const SESSION_KEY = 'nuca_session_v1';
-const CFG_KEY = 'cb_config_v1';
+const CFG_KEY = 'cb_config_v2';
 let session = store.get(SESSION_KEY); // { token, user, nid }
 function setSession(s) { session = s; s ? store.set(SESSION_KEY, s) : store.del(SESSION_KEY); }
 
@@ -294,7 +301,8 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
 const arNum = (n) => Number(n).toLocaleString('ar-EG');
 const fmtDay = (d) => new Intl.DateTimeFormat('ar-EG', { weekday: 'long', day: 'numeric', month: 'long', timeZone: 'UTC' }).format(new Date(d + 'T00:00:00Z'));
 const city = () => state.config.cities.find((c) => c.id === state.cityId);
-const service = () => city()?.services.find((s) => s.id === state.serviceId);
+const service = () => state.config.services.find((s) => s.id === state.serviceId);
+const cityServices = (c) => state.config.services.filter((s) => c.serviceIds.includes(s.id));
 const alertBox = (msg) => msg ? `<p class="alert" role="alert">${esc(msg)}</p>` : '';
 const backBtn = (label = 'رجوع') => `<button class="back" id="back">${ICONS.chev}${label}</button>`;
 function busy(btn, text) { btn.disabled = true; btn.dataset.label = btn.innerHTML; btn.innerHTML = `<span class="spinner"></span>${text}`; }
@@ -338,7 +346,7 @@ window.addEventListener('hashchange', route);
 function requireLogin(next) {
   if (session) return true;
   state.next = next;
-  showLogin('الخدمة دي محتاجة تسجيل دخول. لو معندكش حساب، اعمل واحد في دقيقة.');
+  showLogin('هذه الخدمة تتطلب تسجيل الدخول. إذا لم يتم إنشاء حساب مسبقًا، يمكنك إنشاء حساب جديد.');
   return false;
 }
 function afterLogin() { const n = state.next || '#/'; state.next = ''; go(n); }
@@ -348,11 +356,11 @@ function showHome() {
   app.innerHTML = `
     <button class="hero" id="book">
       <span class="ic">${ICONS.calendar}</span>
-      <span><b>احجز ميعاد بمركز خدمات المواطنين التابع لك</b><span>متاح للجميع من غير تسجيل دخول</span></span>
+      <span><b>احجز ميعاد بمركز خدمات المواطنين التابع لك</b></span>
       <span class="go">${ICONS.chev}</span>
     </button>
     <h3>خدمات الهيئة</h3>
-    ${session ? '' : `<div class="signin-note"><span>سجل دخول علشان تستخدم الخدمات</span><button class="link" id="signin">دخول</button></div>`}
+    ${session ? '' : `<div class="signin-note"><span>برجاء تسجيل الدخول لتصفح الخدمات المقدمة</span><button class="link" id="signin">دخول</button></div>`}
     <ul class="list">
       ${CATEGORIES.map((c) => `
         <li><button class="row" data-cat="${c.id}">
@@ -392,7 +400,7 @@ function showLogin(reason, msg) {
     <div class="field"><label for="nid">الرقم القومي</label><input class="ltr" id="nid" inputmode="numeric" autocomplete="username" maxlength="20" value="${esc(state.nid)}"></div>
     <div class="field"><label for="pw">كلمة السر</label><input class="ltr" id="pw" type="password" autocomplete="current-password"></div>
     <button class="btn" id="go">دخول</button>
-    <p class="switch">معندكش حساب؟ <button class="link" id="reg">اعمل حساب جديد</button></p>`;
+    <p class="switch">لم يتم إنشاء حساب مسبقًا؟ <button class="link" id="reg">إنشاء حساب جديد</button></p>`;
   const nidEl = document.getElementById('nid'), pwEl = document.getElementById('pw');
   (nidEl.value ? pwEl : nidEl).focus();
   document.getElementById('reg').onclick = () => go('#/register');
@@ -476,7 +484,7 @@ function stepsBar(i) {
 
 function startBooking() {
   Object.assign(state, { cityId: '', serviceId: '', date: '' });
-  if (session) { state.nid = session.nid; return showCity(); }
+  if (session) { state.nid = session.nid; return showPlace(); }
   showNid('book');
 }
 
@@ -486,7 +494,7 @@ function showNid(mode, msg) {
     ${backBtn()}
     ${forBook ? stepsBar(0) : ''}
     <h2 tabindex="-1">${forBook ? 'اكتب رقمك القومي' : 'حجوزاتي'}</h2>
-    <p class="hint">${forBook ? 'الحجز باسم صاحب البطاقة، والموظف هيراجع البطاقة الأصلية على الشباك.' : 'اكتب الرقم القومي اللي حجزت بيه، أو سجل دخول.'}</p>
+    <p class="hint">${forBook ? 'برجاء كتابة الرقم القومي لطالب الخدمة، حيث إنه سيتم مراجعة البيانات بالمركز التكنولوجي.' : 'اكتب الرقم القومي اللي حجزت بيه، أو سجل دخول.'}</p>
     ${alertBox(msg)}
     <div class="field"><label for="nid">الرقم القومي (١٤ رقم)</label><input class="ltr" id="nid" inputmode="numeric" autocomplete="off" maxlength="20" value="${esc(state.nid)}" style="font-size:22px;text-align:center"></div>
     <button class="btn" id="next">${forBook ? 'التالي' : 'اعرض حجوزاتي'}</button>`;
@@ -497,7 +505,7 @@ function showNid(mode, msg) {
     const err = nidError(nid);
     if (err) return showNid(mode, err);
     state.nid = nid;
-    if (forBook) return showCity();
+    if (forBook) return showPlace();
     const btn = document.getElementById('next'); busy(btn, 'جاري البحث');
     try { showMine(await api('myBookings', { nationalId: nid })); } catch (e) { showNid(mode, e.message); }
   };
@@ -519,43 +527,55 @@ async function ensureConfig() {
   try { await configReady; return true; } catch (e) { app.innerHTML = alertBox(e.message); return false; }
 }
 
-async function showCity() {
+async function showPlace(msg) {
   if (!(await ensureConfig())) return;
   const cities = state.config.cities;
+  const c = city();
   app.innerHTML = `
     ${backBtn()}
     ${stepsBar(1)}
-    <h2 tabindex="-1">اختار جهاز المدينة</h2>
-    <p class="hint">الجهاز اللي هتروحله يوم الميعاد.</p>
-    ${cities.length ? choiceList(cities.map((c) => ({ id: c.id, label: 'جهاز مدينة ' + c.name })), state.cityId) : '<div class="empty">مفيش أجهزة متاحة للحجز دلوقتي.</div>'}`;
+    <h2 tabindex="-1">اختار المدينة والخدمة</h2>
+    <p class="hint">المدينة اللي فيها مركز خدمات المواطنين اللي هتروحله يوم الميعاد.</p>
+    ${alertBox(msg)}
+    <div class="field">
+      <label for="city">المدن العمرانية الجديدة</label>
+      <select id="city">
+        <option value="">اختار المدينة</option>
+        ${cities.map((x) => `<option value="${esc(x.id)}" ${x.id === state.cityId ? 'selected' : ''}>${esc(x.name)}</option>`).join('')}
+      </select>
+    </div>
+    <div class="field">
+      <label for="svc">نوع الخدمة</label>
+      <select id="svc" ${c ? '' : 'disabled'}>
+        <option value="">${c ? 'اختار الخدمة' : 'اختار المدينة الأول'}</option>
+        ${c ? cityServices(c).map((x) => `<option value="${esc(x.id)}" ${x.id === state.serviceId ? 'selected' : ''}>${esc(x.name)}</option>`).join('') : ''}
+      </select>
+    </div>
+    <div id="docs">${service() ? docsBox(service().requiredDocs) : ''}</div>
+    <button class="btn" id="next" ${c && service() ? '' : 'disabled'}>التالي</button>`;
   document.getElementById('back').onclick = () => (session ? go('#/') : showNid('book'));
-  app.querySelectorAll('.choice').forEach((b) => b.onclick = () => {
-    if (state.cityId !== b.dataset.id) state.serviceId = '';
-    state.cityId = b.dataset.id;
-    loadCityAvail(state.cityId).catch(() => {});
-    showService();
-  });
-  focusTop();
-}
-
-function showService() {
-  app.innerHTML = `
-    ${backBtn()}
-    ${stepsBar(2)}
-    <h2 tabindex="-1">اختار الخدمة</h2>
-    <p class="hint">جهاز مدينة ${esc(city().name)}</p>
-    ${choiceList(city().services.map((s) => ({ id: s.id, label: s.name })), state.serviceId)}`;
-  document.getElementById('back').onclick = showCity;
-  app.querySelectorAll('.choice').forEach((b) => b.onclick = () => { state.serviceId = b.dataset.id; state.date = ''; showDays(); });
+  document.getElementById('city').onchange = (e) => {
+    state.cityId = e.target.value;
+    if (city() && !city().serviceIds.includes(state.serviceId)) state.serviceId = '';
+    if (state.cityId) loadCityAvail(state.cityId).catch(() => {}); // الأيام تتحمل في الخلفية
+    showPlace();
+    document.getElementById('svc').focus();
+  };
+  document.getElementById('svc').onchange = (e) => {
+    state.serviceId = e.target.value;
+    document.getElementById('docs').innerHTML = service() ? docsBox(service().requiredDocs) : '';
+    document.getElementById('next').disabled = !service();
+  };
+  document.getElementById('next').onclick = () => { state.date = ''; showDays(); };
   focusTop();
 }
 
 const docsBox = (docs) => docs && docs.length ? `<div class="docs"><strong>هات معاك يوم الميعاد</strong><ul>${docs.map((d) => `<li>${esc(d)}</li>`).join('')}</ul></div>` : '';
-const daysHead = (msg) => `${backBtn()}${stepsBar(3)}<h2 tabindex="-1">اختار اليوم</h2><p class="hint">${esc(service().name)} · جهاز مدينة ${esc(city().name)}</p>${alertBox(msg)}`;
+const daysHead = (msg) => `${backBtn()}${stepsBar(2)}<h2 tabindex="-1">اختار اليوم</h2><p class="hint">${esc(service().name)} · ${esc(city().name)}</p>${alertBox(msg)}`;
 
 async function showDays(msg) {
   app.innerHTML = daysHead(msg) + '<div class="empty"><span class="spinner"></span>بنجيب الأيام المتاحة</div>';
-  document.getElementById('back').onclick = showService;
+  document.getElementById('back').onclick = () => showPlace();
   focusTop();
   try {
     const { services } = await loadCityAvail(state.cityId, !!msg);
@@ -573,12 +593,12 @@ function renderDays(msg) {
     ${state.date ? `
       <div class="summary">
         <div><span>الخدمة</span><b>${esc(service().name)}</b></div>
-        <div><span>الجهاز</span><b>${esc(city().name)}</b></div>
+        <div><span>المدينة</span><b>${esc(city().name)}</b></div>
         <div><span>اليوم</span><b>${esc(fmtDay(state.date))}</b></div>
       </div>
       ${docsBox(service().requiredDocs)}
       <button class="btn" id="confirm" style="background:var(--accent)">أكّد الحجز</button>` : ''}`;
-  document.getElementById('back').onclick = showService;
+  document.getElementById('back').onclick = () => showPlace();
   app.querySelectorAll('.choice').forEach((b) => b.onclick = () => {
     state.date = b.dataset.id; renderDays();
     document.getElementById('confirm')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -597,10 +617,10 @@ function renderDays(msg) {
 function ticketHtml(b, small) {
   return `
     <article class="ticket ${small ? 'small' : 'confirm-pop'}" aria-label="تذكرة الحجز">
-      <div class="head"><div class="city">جهاز مدينة ${esc(b.cityName)}</div><div class="service">${esc(b.serviceName)}</div></div>
+      <div class="head"><div class="city">مركز خدمات المواطنين · ${esc(b.cityName)}</div><div class="service">${esc(b.serviceName)}</div></div>
       <div class="numbers">
-        <div><div class="lbl">رقم دورك</div><div class="big">${arNum(b.seq)}</div></div>
-        <div>${b.window ? `<div class="lbl">الشباك</div><div class="mid">${/^\d+$/.test(b.window) ? arNum(b.window) : esc(b.window)}</div>` : ''}</div>
+        <div><div class="lbl">رقم الحجز</div><div class="big">${arNum(b.seq)}</div></div>
+        <div class="kiosk">امسح الكود في جهاز الكيوسك بالمركز، وهو هيحددلك الشباك</div>
       </div>
       <div class="date">${esc(fmtDay(b.date))}</div>
       <div class="tear" aria-hidden="true"></div>
@@ -621,7 +641,7 @@ function drawQrs(size) {
 function showTicket(b) {
   app.innerHTML = `
     <h2 tabindex="-1">تم الحجز</h2>
-    <p class="hint">صوّر الشاشة دي أو اكتب كود الحجز. هتحتاجه انت والبطاقة الأصلية يوم الميعاد.</p>
+    <p class="hint">صوّر الشاشة دي أو اكتب كود الحجز. هتحتاجه انت والبطاقة الأصلية يوم الميعاد، وأول ما توصل امسح الكود في جهاز الكيوسك.</p>
     ${ticketHtml(b)}
     ${docsBox(b.requiredDocs)}
     <button class="btn" id="home">تمام</button>
@@ -661,7 +681,7 @@ function showMine({ bookings = [] } = {}, msg) {
 
 // ---------- البداية ----------
 const cachedCfg = store.get(CFG_KEY);
-if (cachedCfg && cachedCfg.data && Array.isArray(cachedCfg.data.cities)) state.config = cachedCfg.data;
+if (cachedCfg && cachedCfg.data && Array.isArray(cachedCfg.data.cities) && Array.isArray(cachedCfg.data.services)) state.config = cachedCfg.data;
 const configReady = api('config', {}).then((data) => { state.config = data; store.set(CFG_KEY, { t: Date.now(), data }); return data; });
 configReady.catch(() => {});
 
