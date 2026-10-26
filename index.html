@@ -14,6 +14,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.6/JsBarcode.all.min.js"></script>
 <style>
   /* ===== ألوان الهوية: غيّرها هنا بس ===== */
   :root {
@@ -162,29 +163,73 @@
   .profile b { display: block; font-size: 18px; }
   .profile span { color: var(--ink-2); font-size: 14px; }
 
-  /* ===== التذكرة ===== */
-  .ticket { --notch: 14px; position: relative; background: var(--surface); border-radius: 16px; margin: 0 0 18px; border: 1px solid var(--line); }
-  .ticket .head { padding: 18px 20px 6px; }
-  .ticket .city { font-size: 14px; color: var(--ink-2); }
-  .ticket .service { font-size: 19px; font-weight: 700; }
-  .ticket .numbers { display: grid; grid-template-columns: auto 1fr; gap: 18px; padding: 8px 20px 18px; align-items: end; }
-  .ticket .kiosk { font-size: 13.5px; color: var(--ink-2); line-height: 1.5; padding-bottom: 6px; }
-  .ticket .lbl { font-size: 14px; color: var(--ink-2); }
-  .ticket .big { font-size: 64px; font-weight: 700; line-height: 1; color: var(--accent); }
-  .ticket .mid { font-size: 40px; font-weight: 700; line-height: 1.05; }
-  .ticket .date { padding: 0 20px 18px; font-weight: 500; }
-  .ticket .tear { position: relative; height: 0; border-top: 2px dashed var(--line); margin: 0 var(--notch); }
-  .ticket .tear::before, .ticket .tear::after { content: ""; position: absolute; top: calc(var(--notch) * -1 - 1px); width: calc(var(--notch) * 2); height: calc(var(--notch) * 2); border-radius: 50%; background: var(--paper); border: 1px solid var(--line); }
-  .ticket .tear::before { right: calc(var(--notch) * -2); clip-path: inset(0 50% 0 0); }
-  .ticket .tear::after { left: calc(var(--notch) * -2); clip-path: inset(0 0 0 50%); }
-  .ticket .foot { display: flex; align-items: center; gap: 16px; padding: 18px 20px; }
-  .ticket .qr { background: #fff; padding: 6px; border-radius: 8px; flex: none; line-height: 0; }
-  .ticket .code { font-size: 15px; font-weight: 700; direction: ltr; text-align: left; word-break: break-all; }
-  .ticket .codelbl { font-size: 13px; color: var(--ink-2); }
-  .ticket.small .big { font-size: 40px; }
-  .ticket.small .mid { font-size: 28px; }
+  /* ===== زرار الحجز الكبير ===== */
+  .home-big { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 18px; width: 100%;
+    min-height: calc(100vh - 330px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)); min-height: calc(100dvh - 330px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px));
+    border: 0; border-bottom: 6px solid var(--gold); border-radius: 22px; padding: 32px 20px; cursor: pointer; text-align: center;
+    background: var(--brand); color: #fff; font-size: 28px; font-weight: 700; line-height: 1.4; }
+  .home-big .ic { width: 96px; height: 96px; border-radius: 26px; background: var(--gold); display: grid; place-items: center; }
+  .home-big .ic svg { width: 54px; height: 54px; stroke-width: 1.6; }
+  .home-big:active { transform: scale(.99); }
+  @media (prefers-color-scheme: dark) { .home-big { background: #164764; } }
+
+  /* ===== المواعيد ===== */
+  .slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 0 0 18px; }
+  .slot { border: 1.5px solid #2E7D32; background: #E8F5E9; color: #1B5E20; border-radius: 10px; padding: 11px 0; font-size: 16px; font-weight: 700; cursor: pointer; direction: ltr; }
+  .slot[disabled] { border-color: #E57373; background: #FDECEC; color: #C62828; cursor: not-allowed; text-decoration: line-through; opacity: .85; }
+  .slot[aria-pressed="true"] { background: #2E7D32; color: #fff; }
+  @media (prefers-color-scheme: dark) {
+    .slot { background: #173A1E; color: #A5D6A7; border-color: #4CAF50; }
+    .slot[disabled] { background: #3B1C1C; color: #EF9A9A; border-color: #8E3B3B; }
+    .slot[aria-pressed="true"] { background: #4CAF50; color: #0B1F0E; }
+  }
+  .legend { display: flex; gap: 16px; font-size: 13.5px; color: var(--ink-2); margin: -4px 0 12px; }
+  .legend span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-inline-end: 6px; vertical-align: -1px; }
+  .legend .ok::before { background: #2E7D32; } .legend .no::before { background: #C62828; }
+
+  /* ===== اختيار من اتنين (الدفع) ===== */
+  .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
+  .seg button { border: 1.5px solid var(--line); background: var(--surface); border-radius: 12px; padding: 13px; font-size: 17px; font-weight: 700; cursor: pointer; }
+  .seg button[aria-pressed="true"] { border-color: var(--brand); background: var(--brand-soft); color: var(--brand); box-shadow: inset 0 0 0 1px var(--brand); }
+
+  /* ===== كارت الحجز ===== */
+  .card { background: #fff; color: #10222F; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; margin: 0 0 14px;
+    -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .card .top { display: flex; align-items: center; gap: 10px; padding: 12px 16px; background: #0E3A55; color: #fff; border-bottom: 4px solid #C4952F; }
+  .card .top img { width: 38px; height: 44px; object-fit: contain; background: #fff; border-radius: 8px; padding: 2px; }
+  .card .top b { display: block; font-size: 15px; line-height: 1.3; } .card .top span { font-size: 12.5px; opacity: .85; }
+  .card .body { padding: 14px 16px 6px; }
+  .card .svc { font-size: 18px; font-weight: 700; line-height: 1.4; margin-bottom: 8px; }
+  .card dl { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin: 0 0 10px; font-size: 15px; }
+  .card dt { color: #5A6670; } .card dd { margin: 0; font-weight: 500; }
+  .card .when { display: flex; gap: 10px; margin: 4px 0 12px; }
+  .card .when div { flex: 1; background: #E7F1E1; border-radius: 12px; padding: 8px 12px; }
+  .card .when small { display: block; font-size: 12.5px; color: #3B7A24; }
+  .card .when b { font-size: 18px; }
+  .card .codes { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-top: 2px dashed #DED9CC; }
+  .card .qr { line-height: 0; flex: none; }
+  .card .codebox { flex: 1; min-width: 0; text-align: center; }
+  .card .codelbl { font-size: 12.5px; color: #5A6670; }
+  .card .code { font-size: 19px; font-weight: 700; direction: ltr; letter-spacing: .5px; }
+  .card svg.barcode { width: 100%; height: 56px; display: block; margin-top: 4px; }
+  .card .rules { margin: 0; padding: 12px 16px 14px; background: #F6ECD5; font-size: 14px; line-height: 1.7; }
+  .card .rules b { display: block; margin-bottom: 2px; }
+  .card .rules ul { margin: 0; padding-inline-start: 18px; }
+  .card.small .svc { font-size: 16.5px; }
+  .card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 0 0 24px; }
+  .card-actions .btn { padding: 11px; font-size: 15.5px; margin: 0; }
   .confirm-pop { animation: pop .45s ease-out; }
   @keyframes pop { from { transform: translateY(10px) scale(.98); opacity: 0; } to { transform: none; opacity: 1; } }
+
+  /* ===== الطباعة: الكارت بس ===== */
+  @media print {
+    @page { size: A5 portrait; margin: 10mm; }
+    body { background: #fff !important; padding: 0 !important; }
+    body * { visibility: hidden !important; }
+    .print-me, .print-me * { visibility: visible !important; }
+    .print-me { position: absolute; inset: 0 0 auto 0; margin: 0 !important; border: 1px solid #999 !important; animation: none !important; }
+    .topbar, nav.tabs, footer.credit { display: none !important; }
+  }
 
   /* ===== حقوق الملكية ===== */
   .wrap { padding-bottom: 8px; }
@@ -229,7 +274,7 @@
 
 <script>
 // ===== لينك الـ Web App =====
-const API_URL = 'https://script.google.com/macros/s/AKfycbwdwZ7ufqhUOjArfn19wt7E0nsJRrbHBC0trmNJFKsielr2ZZpARUnWOpR-LO6-qe176g/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbxjgX1FjxsbrFJyvWLOxcp8u6zaZVUZfQjG6O6fdBf04ePdzoNW1G--48qdSN9rU6Lwgg/exec';
 
 // ===== أقسام الخدمات (عدّل الأسماء من هنا) =====
 const CATEGORIES = [
@@ -262,8 +307,7 @@ const ICONS = {
 document.querySelectorAll('[data-icon]').forEach((el) => { el.outerHTML = ICONS[el.dataset.icon]; });
 
 
-const STEPS = ['الرقم القومي', 'المدينة والخدمة', 'اليوم'];
-const state = { config: null, nid: '', cityId: '', serviceId: '', date: '', days: [], next: '' };
+const state = { config: null, nid: '', name: '', cityId: '', serviceId: '', date: '', slot: '', payment: '', days: [], slots: [], next: '' };
 const app = document.getElementById('app');
 const avail = {};
 
@@ -333,7 +377,7 @@ function setTab(tab) {
 
 function route() {
   const [path, arg] = location.hash.replace(/^#\/?/, '').split('/');
-  if (path === 'cat') { setTab('home'); return requireLogin('#/cat/' + arg) && showCategory(arg); }
+  if (path === 'cat' && SHOW_CATEGORIES) { setTab('home'); return requireLogin('#/cat/' + arg) && showCategory(arg); }
   if (path === 'book') { setTab('home'); return startBooking(); }
   if (path === 'mine') { setTab('mine'); return session ? loadMine() : showNid('mine'); }
   if (path === 'account') { setTab('account'); return session ? showAccount() : showLogin(); }
@@ -352,13 +396,16 @@ function requireLogin(next) {
 function afterLogin() { const n = state.next || '#/'; state.next = ''; go(n); }
 
 // ---------- الرئيسية ----------
+// الأقسام الخمسة مخفية دلوقتي. لو حبيت ترجعها خلي SHOW_CATEGORIES = true
+const SHOW_CATEGORIES = false;
+
 function showHome() {
   app.innerHTML = `
-    <button class="hero" id="book">
+    <button class="home-big" id="book">
       <span class="ic">${ICONS.calendar}</span>
-      <span><b>احجز ميعاد بمركز خدمات المواطنين التابع لك</b></span>
-      <span class="go">${ICONS.chev}</span>
+      <span>حجز موعد بجهاز مدينة</span>
     </button>
+    ${SHOW_CATEGORIES ? `
     <h3>خدمات الهيئة</h3>
     ${session ? '' : `<div class="signin-note"><span>برجاء تسجيل الدخول لتصفح الخدمات المقدمة</span><button class="link" id="signin">دخول</button></div>`}
     <ul class="list">
@@ -368,7 +415,7 @@ function showHome() {
           <span class="tx">${esc(c.title)}<small>${arNum(c.services.length)} خدمات</small></span>
           <span class="end">${session ? ICONS.chev : ICONS.lock}</span>
         </button></li>`).join('')}
-    </ul>`;
+    </ul>` : ''}`;
   document.getElementById('book').onclick = () => go('#/book');
   document.getElementById('signin')?.addEventListener('click', () => go('#/login'));
   app.querySelectorAll('[data-cat]').forEach((b) => b.onclick = () => go('#/cat/' + b.dataset.cat));
@@ -421,36 +468,55 @@ function showLogin(reason, msg) {
   pwEl.onkeydown = (e) => { if (e.key === 'Enter') submit(); };
 }
 
+const PAY = { cash: 'كاش', visa: 'فيزا' };
+const payToggle = (sel) => `<div class="seg" role="group" aria-label="طريقة الدفع">
+  ${Object.keys(PAY).map((k) => `<button type="button" data-pay="${k}" aria-pressed="${sel === k}">${PAY[k]}</button>`).join('')}</div>`;
+function bindPay(onPick) {
+  app.querySelectorAll('[data-pay]').forEach((b) => b.onclick = () => {
+    app.querySelectorAll('[data-pay]').forEach((x) => x.setAttribute('aria-pressed', x === b));
+    onPick(b.dataset.pay);
+  });
+}
+const nameError = (n) => n.trim().split(/\s+/).length < 4 ? 'اكتب الاسم رباعي' : '';
+
 function showRegister(msg, vals = {}) {
   app.innerHTML = `
     ${backBtn()}
     <h2 tabindex="-1">حساب جديد</h2>
     <p class="hint">حساب واحد لكل رقم قومي.</p>
     ${alertBox(msg)}
-    <div class="field"><label for="name">الاسم (ثلاثي على الأقل)</label><input id="name" autocomplete="name" value="${esc(vals.name)}"></div>
+    <div class="field"><label for="name">الاسم رباعي</label><input id="name" autocomplete="name" value="${esc(vals.name)}"></div>
     <div class="field"><label for="nid">الرقم القومي</label><input class="ltr" id="nid" inputmode="numeric" autocomplete="username" maxlength="20" value="${esc(vals.nid || state.nid)}"></div>
     <div class="field"><label for="phone">رقم الموبايل</label><input class="ltr" id="phone" inputmode="tel" autocomplete="tel" maxlength="15" placeholder="01xxxxxxxxx" value="${esc(vals.phone)}"></div>
+    <div class="field"><label for="email">البريد الإلكتروني <span style="color:var(--ink-2);font-weight:400">(اختياري)</span></label><input class="ltr" id="email" type="email" inputmode="email" autocomplete="email" value="${esc(vals.email)}"></div>
+    <div class="field"><label>طريقة الدفع المفضلة</label>${payToggle(vals.payment)}</div>
     <div class="field"><label for="pw">كلمة السر</label><input class="ltr" id="pw" type="password" autocomplete="new-password"><div class="sub">٦ حروف أو أرقام على الأقل</div></div>
     <div class="field"><label for="pw2">تأكيد كلمة السر</label><input class="ltr" id="pw2" type="password" autocomplete="new-password"></div>
     <button class="btn" id="go">إنشاء الحساب</button>
-    <p class="switch">عندك حساب؟ <button class="link" id="login">سجل دخول</button></p>`;
+    <p class="switch">عندك حساب؟ <button class="link" id="login">تسجيل الدخول</button></p>`;
+  let payment = vals.payment || '';
+  bindPay((v) => { payment = v; });
   document.getElementById('back').onclick = () => history.back();
   document.getElementById('login').onclick = () => go('#/login');
   document.getElementById('go').onclick = async () => {
     const v = {
-      name: document.getElementById('name').value.trim(),
+      name: document.getElementById('name').value.trim().replace(/\s+/g, ' '),
       nid: normalizeDigits(document.getElementById('nid').value),
       phone: normalizeDigits(document.getElementById('phone').value),
+      email: document.getElementById('email').value.trim(),
+      payment,
     };
     const pw = document.getElementById('pw').value, pw2 = document.getElementById('pw2').value;
-    if (v.name.split(/\s+/).length < 3) return showRegister('اكتب اسمك ثلاثي على الأقل', v);
+    const nErr = nameError(v.name); if (nErr) return showRegister(nErr, v);
     const err = nidError(v.nid); if (err) return showRegister(err, v);
     if (!/^01[0125]\d{8}$/.test(v.phone)) return showRegister('رقم الموبايل لازم يكون ١١ رقم ويبدأ بـ 010 أو 011 أو 012 أو 015', v);
+    if (v.email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.email)) return showRegister('البريد الإلكتروني غير صحيح', v);
+    if (!v.payment) return showRegister('اختار طريقة الدفع المفضلة', v);
     if (pw.length < 6) return showRegister('كلمة السر لازم ٦ حروف على الأقل', v);
     if (pw !== pw2) return showRegister('كلمتين السر مش زي بعض', v);
     const btn = document.getElementById('go'); busy(btn, 'جاري إنشاء الحساب');
     try {
-      const r = await api('register', { name: v.name, nationalId: v.nid, phone: v.phone, password: pw });
+      const r = await api('register', { name: v.name, nationalId: v.nid, phone: v.phone, email: v.email, payment: v.payment, password: pw });
       setSession({ token: r.token, user: r.user, nid: v.nid });
       state.nid = v.nid;
       afterLogin();
@@ -465,7 +531,9 @@ function showAccount() {
     <h2 tabindex="-1">حسابي</h2>
     <div class="profile" style="margin-top:14px">
       <div class="avatar">${esc((u.name || '؟').trim()[0])}</div>
-      <div><b>${esc(u.name)}</b><span>الرقم القومي: <bdi dir="ltr">${esc(u.nidMasked)}</bdi></span><br><span>الموبايل: <bdi dir="ltr">${esc(u.phone)}</bdi></span></div>
+      <div><b>${esc(u.name)}</b><span>الرقم القومي: <bdi dir="ltr">${esc(u.nidMasked)}</bdi></span><br><span>الموبايل: <bdi dir="ltr">${esc(u.phone)}</bdi></span>
+        ${u.email ? `<br><span>البريد: <bdi dir="ltr">${esc(u.email)}</bdi></span>` : ''}
+        ${u.payment ? `<br><span>طريقة الدفع المفضلة: ${esc(PAY[u.payment] || '')}</span>` : ''}</div>
     </div>
     <ul class="list">
       <li><button class="row" id="mine"><span class="ic">${ICONS.ticket}</span><span class="tx">حجوزاتي</span><span class="end">${ICONS.chev}</span></button></li>
@@ -478,13 +546,14 @@ function showAccount() {
 }
 
 // ---------- الحجز ----------
+const STEPS_B = ['بيانات طالب الخدمة', 'المدينة والخدمة', 'الموعد'];
 function stepsBar(i) {
-  return '<ol class="steps">' + STEPS.map((s, k) => `<li class="${k < i ? 'done' : k === i ? 'now' : ''}"${k === i ? ' aria-current="step"' : ''}>${s}</li>`).join('') + '</ol>';
+  return '<ol class="steps">' + STEPS_B.map((s, k) => `<li class="${k < i ? 'done' : k === i ? 'now' : ''}"${k === i ? ' aria-current="step"' : ''}>${s}</li>`).join('') + '</ol>';
 }
 
 function startBooking() {
-  Object.assign(state, { cityId: '', serviceId: '', date: '' });
-  if (session) { state.nid = session.nid; return showPlace(); }
+  Object.assign(state, { cityId: '', serviceId: '', date: '', slot: '', payment: '' });
+  if (session) { state.nid = session.nid; state.name = session.user.name; return showPlace(); }
   showNid('book');
 }
 
@@ -493,18 +562,25 @@ function showNid(mode, msg) {
   app.innerHTML = `
     ${backBtn()}
     ${forBook ? stepsBar(0) : ''}
-    <h2 tabindex="-1">${forBook ? 'اكتب رقمك القومي' : 'حجوزاتي'}</h2>
+    <h2 tabindex="-1">${forBook ? 'بيانات طالب الخدمة' : 'حجوزاتي'}</h2>
     <p class="hint">${forBook ? 'برجاء كتابة الرقم القومي لطالب الخدمة، حيث إنه سيتم مراجعة البيانات بالمركز التكنولوجي.' : 'اكتب الرقم القومي اللي حجزت بيه، أو سجل دخول.'}</p>
     ${alertBox(msg)}
-    <div class="field"><label for="nid">الرقم القومي (١٤ رقم)</label><input class="ltr" id="nid" inputmode="numeric" autocomplete="off" maxlength="20" value="${esc(state.nid)}" style="font-size:22px;text-align:center"></div>
+    ${forBook ? `<div class="field"><label for="name">اسم طالب الخدمة (رباعي)</label><input id="name" autocomplete="name" value="${esc(state.name)}"></div>` : ''}
+    <div class="field"><label for="nid">الرقم القومي (١٤ رقم)</label><input class="ltr" id="nid" inputmode="numeric" autocomplete="off" maxlength="20" value="${esc(state.nid)}" style="font-size:20px;text-align:center"></div>
     <button class="btn" id="next">${forBook ? 'التالي' : 'اعرض حجوزاتي'}</button>`;
-  const input = document.getElementById('nid'); input.focus();
+  const nameEl = document.getElementById('name'), input = document.getElementById('nid');
+  (nameEl && !nameEl.value ? nameEl : input).focus();
   document.getElementById('back').onclick = () => go('#/');
   const submit = async () => {
+    // نحفظ اللي اتكتب الأول علشان لو فيه خطأ ميتمسحش
     const nid = normalizeDigits(input.value);
+    state.nid = nid;
+    if (forBook) {
+      state.name = nameEl.value.trim().replace(/\s+/g, ' ');
+      const nErr = nameError(state.name); if (nErr) return showNid(mode, nErr);
+    }
     const err = nidError(nid);
     if (err) return showNid(mode, err);
-    state.nid = nid;
     if (forBook) return showPlace();
     const btn = document.getElementById('next'); busy(btn, 'جاري البحث');
     try { showMine(await api('myBookings', { nationalId: nid })); } catch (e) { showNid(mode, e.message); }
@@ -535,7 +611,7 @@ async function showPlace(msg) {
     ${backBtn()}
     ${stepsBar(1)}
     <h2 tabindex="-1">اختار المدينة والخدمة</h2>
-    <p class="hint">المدينة اللي فيها مركز خدمات المواطنين اللي هتروحله يوم الميعاد.</p>
+    <p class="hint">اختر المدينة لحجز موعد بمركز خدمات المواطنين التابع لها.</p>
     ${alertBox(msg)}
     <div class="field">
       <label for="city">المدن العمرانية الجديدة</label>
@@ -557,7 +633,7 @@ async function showPlace(msg) {
   document.getElementById('city').onchange = (e) => {
     state.cityId = e.target.value;
     if (city() && !city().serviceIds.includes(state.serviceId)) state.serviceId = '';
-    if (state.cityId) loadCityAvail(state.cityId).catch(() => {}); // الأيام تتحمل في الخلفية
+    if (state.cityId) loadCityAvail(state.cityId).catch(() => {});
     showPlace();
     document.getElementById('svc').focus();
   };
@@ -566,93 +642,154 @@ async function showPlace(msg) {
     document.getElementById('docs').innerHTML = service() ? docsBox(service().requiredDocs) : '';
     document.getElementById('next').disabled = !service();
   };
-  document.getElementById('next').onclick = () => { state.date = ''; showDays(); };
+  document.getElementById('next').onclick = () => { state.date = ''; state.slot = ''; showDays(); };
   focusTop();
 }
 
-const docsBox = (docs) => docs && docs.length ? `<div class="docs"><strong>هات معاك يوم الميعاد</strong><ul>${docs.map((d) => `<li>${esc(d)}</li>`).join('')}</ul></div>` : '';
-const daysHead = (msg) => `${backBtn()}${stepsBar(2)}<h2 tabindex="-1">اختار اليوم</h2><p class="hint">${esc(service().name)} · ${esc(city().name)}</p>${alertBox(msg)}`;
+const docsBox = (docs) => docs && docs.length ? `<div class="docs"><strong>المستندات المطلوبة</strong><ul>${docs.map((d) => `<li>${esc(d)}</li>`).join('')}</ul></div>` : '';
+const daysHead = (msg) => `${backBtn()}${stepsBar(2)}<h2 tabindex="-1">اختار اليوم والميعاد</h2><p class="hint">${esc(service().name)} · ${esc(city().name)}</p>${alertBox(msg)}`;
 
 async function showDays(msg) {
-  app.innerHTML = daysHead(msg) + '<div class="empty"><span class="spinner"></span>بنجيب الأيام المتاحة</div>';
+  app.innerHTML = daysHead(msg) + '<div class="empty"><span class="spinner"></span>بنجيب المواعيد المتاحة</div>';
   document.getElementById('back').onclick = () => showPlace();
   focusTop();
   try {
-    const { services } = await loadCityAvail(state.cityId, !!msg);
-    state.days = services[state.serviceId] || [];
+    const r = await loadCityAvail(state.cityId, !!msg);
+    state.days = r.services[state.serviceId] || [];
+    state.slots = r.slots || [];
     renderDays(msg);
   } catch (e) { app.querySelector('.empty').outerHTML = alertBox(e.message); }
 }
 
 function renderDays(msg) {
-  const days = state.days, open = days.filter((d) => d.remaining !== 0);
+  const days = state.days, open = days.filter((d) => d.remaining > 0);
+  const day = days.find((d) => d.date === state.date);
   const items = days.map((d) => ({ id: d.date, label: fmtDay(d.date), disabled: d.remaining === 0, full: d.remaining === 0,
-    meta: d.remaining === 0 ? 'اكتمل' : d.remaining === null ? 'متاح' : `باقي ${arNum(d.remaining)} مكان` }));
+    meta: d.remaining === 0 ? 'مكتمل' : `متاح ${arNum(d.remaining)} حجز` }));
+  if (!state.payment && session && session.user.payment) state.payment = session.user.payment;
   app.innerHTML = daysHead(msg) + `
     ${open.length ? choiceList(items, state.date) : '<div class="empty">كل الأيام المتاحة اكتملت. جرّب تاني بكرة، بيتفتح يوم جديد كل يوم.</div>'}
-    ${state.date ? `
-      <div class="summary">
+    ${day ? `
+      <h3 id="slots-h">اختار الميعاد · ${esc(fmtDay(day.date))}</h3>
+      <div class="legend"><span class="ok">متاح</span><span class="no">محجوز</span></div>
+      <div class="slots">
+        ${state.slots.map((t) => { const taken = day.taken.includes(t);
+          return `<button class="slot" data-slot="${t}" ${taken ? 'disabled aria-label="' + t + ' محجوز"' : ''} aria-pressed="${t === state.slot}">${t}</button>`; }).join('')}
+      </div>` : ''}
+    ${day && state.slot ? `
+      <div class="summary" id="sum">
+        <div><span>طالب الخدمة</span><b>${esc(state.name)}</b></div>
         <div><span>الخدمة</span><b>${esc(service().name)}</b></div>
         <div><span>المدينة</span><b>${esc(city().name)}</b></div>
-        <div><span>اليوم</span><b>${esc(fmtDay(state.date))}</b></div>
+        <div><span>الموعد</span><b>${esc(fmtDay(state.date))} · <bdi dir="ltr">${state.slot}</bdi></b></div>
       </div>
-      ${docsBox(service().requiredDocs)}
-      <button class="btn" id="confirm" style="background:var(--accent)">أكّد الحجز</button>` : ''}`;
+      <div class="field"><label>طريقة الدفع</label>${payToggle(state.payment)}</div>
+      <button class="btn" id="confirm" style="background:var(--accent)">تأكيد الحجز</button>` : ''}`;
   document.getElementById('back').onclick = () => showPlace();
   app.querySelectorAll('.choice').forEach((b) => b.onclick = () => {
-    state.date = b.dataset.id; renderDays();
-    document.getElementById('confirm')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    state.date = b.dataset.id; state.slot = ''; renderDays();
+    document.getElementById('slots-h')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
+  app.querySelectorAll('.slot:not([disabled])').forEach((b) => b.onclick = () => {
+    state.slot = b.dataset.slot; renderDays();
+    document.getElementById('sum')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+  bindPay((v) => { state.payment = v; });
   const confirm = document.getElementById('confirm');
   if (confirm) confirm.onclick = async () => {
-    busy(confirm, 'بنسجل حجزك، ثواني');
+    if (!state.payment) { const m = document.querySelector('.seg'); m.insertAdjacentHTML('beforebegin', alertBox('اختار طريقة الدفع')); return; }
+    busy(confirm, 'جاري تأكيد الحجز');
+    const payload = { nationalId: state.nid, cityId: state.cityId, serviceId: state.serviceId, date: state.date, slot: state.slot, payment: state.payment };
+    if (session) payload.token = session.token; else payload.name = state.name;
     try {
-      const b = await api('book', { nationalId: state.nid, cityId: state.cityId, serviceId: state.serviceId, date: state.date });
+      const b = await api('book', payload);
       delete avail[state.cityId];
       showTicket(b);
-    } catch (e) { state.date = ''; showDays(e.message); }
+    } catch (e) {
+      if (/سجل دخول/.test(e.message)) { setSession(null); }
+      state.slot = '';
+      showDays(e.message);
+    }
   };
 }
 
-function ticketHtml(b, small) {
+// ---------- كارت الحجز ----------
+const RULES = [
+  'ضرورة تواجد الشخص المنوط بالخدمة وإحضار أصل البطاقة الشخصية معه.',
+  'ضرورة التواجد قبل الموعد بـ 10 دقائق بالمركز التكنولوجي.',
+  'يعتبر الحجز لاغي في حالة عدم التواجد بالموعد المقرر بالحجز.',
+  'ضرورة إحضار كارت الحجز مطبوع.',
+];
+
+function cardHtml(b, small) {
   return `
-    <article class="ticket ${small ? 'small' : 'confirm-pop'}" aria-label="تذكرة الحجز">
-      <div class="head"><div class="city">مركز خدمات المواطنين · ${esc(b.cityName)}</div><div class="service">${esc(b.serviceName)}</div></div>
-      <div class="numbers">
-        <div><div class="lbl">رقم الحجز</div><div class="big">${arNum(b.seq)}</div></div>
-        <div class="kiosk">امسح الكود في جهاز الكيوسك بالمركز، وهو هيحددلك الشباك</div>
+    <article class="card ${small ? 'small' : 'confirm-pop'}" id="card-${esc(b.code)}" aria-label="كارت الحجز">
+      <div class="top"><img src="icons/logo.png" alt=""><div><b>هيئة المجتمعات العمرانية الجديدة</b><span>كارت حجز موعد · مركز خدمات المواطنين</span></div></div>
+      <div class="body">
+        <div class="svc">${esc(b.serviceName)}</div>
+        <dl>
+          <dt>الاسم</dt><dd>${esc(b.customerName || '')}</dd>
+          <dt>الرقم القومي</dt><dd><bdi dir="ltr">${esc(b.nidMasked)}</bdi></dd>
+          <dt>المدينة</dt><dd>${esc(b.cityName)}</dd>
+          ${b.paymentLabel ? `<dt>طريقة الدفع</dt><dd>${esc(b.paymentLabel)}</dd>` : ''}
+        </dl>
+        <div class="when">
+          <div><small>اليوم</small><b>${esc(fmtDay(b.date))}</b></div>
+          ${b.slot ? `<div style="flex:.6"><small>الميعاد</small><b dir="ltr">${esc(b.slot)}</b></div>` : ''}
+        </div>
       </div>
-      <div class="date">${esc(fmtDay(b.date))}</div>
-      <div class="tear" aria-hidden="true"></div>
-      <div class="foot">
+      <div class="codes">
         <div class="qr" data-code="${esc(b.code)}"></div>
-        <div><div class="codelbl">كود الحجز</div><div class="code">${esc(b.code)}</div><div class="codelbl">البطاقة: <bdi dir="ltr">${esc(b.nidMasked)}</bdi></div></div>
+        <div class="codebox">
+          <div class="codelbl">كود الحجز</div>
+          <div class="code">${esc(b.code)}</div>
+          <svg class="barcode" data-code="${esc(b.code)}" aria-label="باركود ${esc(b.code)}"></svg>
+        </div>
       </div>
+      <div class="rules"><b>يرجى التفضل:</b><ul>${RULES.map((r) => `<li>${r}</li>`).join('')}</ul></div>
     </article>`;
 }
 
-function drawQrs(size) {
+function drawCodes(qrSize) {
   app.querySelectorAll('.qr[data-code]').forEach((el) => {
-    if (window.QRCode) new QRCode(el, { text: el.dataset.code, width: size, height: size, correctLevel: QRCode.CorrectLevel.M });
+    if (el.childElementCount) return;
+    if (window.QRCode) new QRCode(el, { text: el.dataset.code, width: qrSize, height: qrSize, correctLevel: QRCode.CorrectLevel.M });
     else el.remove();
   });
+  app.querySelectorAll('svg.barcode[data-code]').forEach((el) => {
+    if (el.childElementCount) return;
+    if (window.JsBarcode) JsBarcode(el, el.dataset.code, { format: 'CODE128', displayValue: false, height: 56, margin: 0, width: 2, background: '#ffffff', lineColor: '#000000' });
+    else el.remove();
+  });
+}
+// المكتبات بتتحمّل بعد الصفحة، فلو الكارت ظهر قبلها نرسم أول ما تخلص
+window.addEventListener('load', () => drawCodes(document.querySelector('.card.small') ? 84 : 104));
+
+function printCard(code) {
+  const el = document.getElementById('card-' + code);
+  if (!el) return;
+  document.querySelectorAll('.print-me').forEach((x) => x.classList.remove('print-me'));
+  el.classList.add('print-me');
+  window.print();
 }
 
 function showTicket(b) {
   app.innerHTML = `
-    <h2 tabindex="-1">تم الحجز</h2>
-    <p class="hint">صوّر الشاشة دي أو اكتب كود الحجز. هتحتاجه انت والبطاقة الأصلية يوم الميعاد، وأول ما توصل امسح الكود في جهاز الكيوسك.</p>
-    ${ticketHtml(b)}
+    <h2 tabindex="-1">تم تأكيد الحجز</h2>
+    <p class="hint">اطبع الكارت ده وهاته معاك يوم الموعد مع أصل البطاقة.</p>
+    ${cardHtml(b)}
     ${docsBox(b.requiredDocs)}
-    <button class="btn" id="home">تمام</button>
-    <button class="btn quiet" id="mine">حجوزاتي</button>`;
-  drawQrs(112);
+    <button class="btn" id="print">طباعة كارت الحجز</button>
+    <button class="btn quiet" id="mine">حجوزاتي</button>
+    <button class="btn quiet" id="home">الرئيسية</button>`;
+  drawCodes(104);
+  document.getElementById('print').onclick = () => printCard(b.code);
   document.getElementById('home').onclick = () => go('#/');
-  document.getElementById('mine').onclick = () => (session ? go('#/mine') : loadMine(true));
+  document.getElementById('mine').onclick = () => (session ? go('#/mine') : loadMine());
   focusTop();
 }
 
-async function loadMine(useState) {
+async function loadMine() {
   const nid = session ? session.nid : state.nid;
   app.innerHTML = '<h2 tabindex="-1">حجوزاتي</h2><div class="empty" style="margin-top:14px"><span class="spinner"></span>جاري التحميل</div>';
   try { showMine(await api('myBookings', { nationalId: nid })); }
@@ -662,15 +799,20 @@ async function loadMine(useState) {
 function showMine({ bookings = [] } = {}, msg) {
   app.innerHTML = `
     <h2 tabindex="-1">حجوزاتي</h2>
-    <p class="hint">الحجوزات اللي لسه ميعادها مجاش. تقدر تحجز ٣ خدمات مختلفة بحد أقصى.</p>
+    <p class="hint">الحجوزات اللي لسه موعدها مجاش. الحد الأقصى ٣ حجوزات قائمة في نفس الوقت.</p>
     ${alertBox(msg)}
-    ${bookings.length ? bookings.map((b) => `${ticketHtml(b, true)}<button class="btn quiet cancel" data-code="${esc(b.code)}" style="margin:-8px 0 22px">الغي الحجز ده</button>`).join('')
+    ${bookings.length ? bookings.map((b) => `${cardHtml(b, true)}
+      <div class="card-actions">
+        <button class="btn quiet print" data-code="${esc(b.code)}">طباعة</button>
+        <button class="btn quiet cancel" data-code="${esc(b.code)}">إلغاء الحجز</button>
+      </div>`).join('')
       : '<div class="empty">مفيش حجوزات قائمة.</div>'}
-    <button class="btn" id="new">${ICONS.calendar}احجز ميعاد جديد</button>`;
-  drawQrs(84);
+    <button class="btn" id="new">${ICONS.calendar}حجز موعد جديد</button>`;
+  drawCodes(84);
   document.getElementById('new').onclick = () => go('#/book');
+  app.querySelectorAll('.print').forEach((btn) => btn.onclick = () => printCard(btn.dataset.code));
   app.querySelectorAll('.cancel').forEach((btn) => btn.onclick = async () => {
-    if (!confirm('متأكد إنك عايز تلغي الحجز ' + btn.dataset.code + '؟ مكانك هيروح لحد تاني.')) return;
+    if (!confirm('متأكد إنك عايز تلغي الحجز ' + btn.dataset.code + '؟ الموعد هيبقى متاح لغيرك.')) return;
     busy(btn, 'جاري الإلغاء');
     const nid = session ? session.nid : state.nid;
     try { await api('cancel', { nationalId: nid, code: btn.dataset.code }); showMine(await api('myBookings', { nationalId: nid })); }
