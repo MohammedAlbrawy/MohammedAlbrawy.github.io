@@ -713,7 +713,7 @@ function cardHtml(b, small) {
         </div>
         <div class="when">
           <div><small>اليوم</small><b>${esc(fmtDay(b.date))}</b></div>
-          ${b.seq ? `<div style="flex:.6"><small>رقم الدور</small><b>${esc(arNum(b.seq))}</b></div>` : ''}
+          ${b.queueNo ? `<div style="flex:.7"><small>رقم الدور</small><b dir="ltr">${esc(b.queueNo)}</b></div>` : ''}
         </div>
       </div>
       <div class="codes">

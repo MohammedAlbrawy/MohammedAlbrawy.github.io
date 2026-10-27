@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E3A55">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
+<title>لوحة الموظفين · مراكز خدمات المواطنين</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #F3F2EC;
+    --surface: #FFFFFF;
+    --ink: #10222F;
+    --ink-2: #5A6670;
+    --line: #DED9CC;
+    --brand: #0E3A55;
+    --brand-ink: #FFFFFF;
+    --brand-soft: #E6EDF2;
+    --accent: #3B7A24;
+    --accent-soft: #E7F1E1;
+    --gold: #B5852A;
+    --gold-soft: #F6ECD5;
+    --danger: #A8322B;
+    --danger-soft: #F6E4E2;
+    --focus: #2F6FDB;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --paper: #0A1720; --surface: #11232F; --ink: #EAF0F3; --ink-2: #A3B2BC; --line: #24394A;
+      --brand: #7FB3D3; --brand-ink: #06202F; --brand-soft: #16334A; --accent: #78BF5A; --accent-soft: #1A3320;
+      --gold: #E2B656; --gold-soft: #3A2F16; --danger: #F08C84; --danger-soft: #3A1F1F; --focus: #8DB6F5;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  :root { padding-top: env(safe-area-inset-top, 0px); padding-bottom: env(safe-area-inset-bottom, 0px); }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.6 'IBM Plex Sans Arabic', 'Segoe UI', Tahoma, sans-serif; }
+  button, input, select { font: inherit; color: inherit; }
+  :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+  [hidden] { display: none !important; }
+
+  /* ===== الشريط العلوي ===== */
+  .bar { background: #0E3A55; color: #fff; display: flex; align-items: center; gap: 14px; padding: 10px 20px; flex-wrap: wrap; }
+  .bar img { width: 40px; height: 40px; border-radius: 50%; background: #fff; padding: 3px; }
+  .bar .title { font-weight: 700; line-height: 1.3; }
+  .bar .title small { display: block; font-weight: 400; opacity: .8; font-size: 13px; }
+  .bar .grow { flex: 1; }
+  .bar select { background: #164B6D; border: 1px solid #2B648A; color: #fff; border-radius: 10px; padding: 6px 10px; }
+  .bar .who { font-size: 14px; opacity: .9; }
+  .bar .out { background: none; border: 1px solid #2B648A; color: #fff; border-radius: 10px; padding: 6px 12px; cursor: pointer; }
+
+  .tabs { display: flex; gap: 4px; padding: 0 20px; background: #0E3A55; border-bottom: 4px solid var(--gold); }
+  .tabs button { background: none; border: 0; color: #C9D8E3; padding: 10px 18px; cursor: pointer; border-radius: 10px 10px 0 0; font-weight: 500; }
+  .tabs button[aria-selected="true"] { background: var(--paper); color: var(--ink); font-weight: 700; }
+
+  main { max-width: 1240px; margin: 0 auto; padding: 22px 20px 60px; }
+  h2 { margin: 0 0 4px; font-size: 22px; }
+  h3 { margin: 0 0 10px; font-size: 17px; }
+  .hint { color: var(--ink-2); margin: 0 0 16px; font-size: 14.5px; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+  .cols { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 18px; align-items: start; }
+  @media (max-width: 860px) { .cols { grid-template-columns: 1fr; } }
+
+  label { display: block; font-weight: 500; margin: 0 0 6px; font-size: 14.5px; }
+  input, select { width: 100%; padding: 11px 12px; border: 1.5px solid var(--line); border-radius: 10px; background: var(--surface); }
+  input:focus, select:focus { border-color: var(--brand); outline: none; box-shadow: 0 0 0 3px var(--brand-soft); }
+  .ltr { direction: ltr; text-align: left; }
+  .field { margin-bottom: 14px; }
+  .row { display: flex; gap: 10px; align-items: end; flex-wrap: wrap; }
+  .row > * { flex: 1; min-width: 140px; }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 0; border-radius: 12px; padding: 12px 18px; font-weight: 700; cursor: pointer; background: var(--brand); color: var(--brand-ink); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn.green { background: var(--accent); color: #fff; }
+  .btn.gold { background: var(--gold-soft); color: var(--ink); border: 1.5px solid var(--gold); }
+  .btn.ghost { background: var(--surface); color: var(--ink); border: 1.5px solid var(--line); }
+  .btn.red { background: var(--danger-soft); color: var(--danger); border: 1.5px solid var(--danger); }
+  .btn.small { padding: 6px 12px; border-radius: 9px; font-size: 14px; font-weight: 500; }
+  .btn.wide { width: 100%; }
+
+  .alert { border-radius: 10px; padding: 10px 14px; margin: 0 0 14px; background: var(--danger-soft); color: var(--danger); font-weight: 500; }
+  .alert.ok { background: var(--accent-soft); color: var(--accent); }
+  .spinner { width: 16px; height: 16px; border: 2.5px solid currentColor; border-left-color: transparent; border-radius: 50%; animation: spin .8s linear infinite; display: inline-block; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @media (prefers-reduced-motion: reduce) { .spinner { animation-duration: 2.4s; } }
+
+  /* رقم الدور: الحاجة الوحيدة الكبيرة في الصفحة */
+  .qno { font-weight: 700; letter-spacing: .02em; direction: ltr; unicode-bidi: isolate; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  /* ===== الدخول ===== */
+  .login { max-width: 380px; margin: 8vh auto; }
+  .login .panel { padding: 26px; }
+  .login img { width: 64px; display: block; margin: 0 auto 10px; }
+  .login h1 { text-align: center; font-size: 20px; margin: 0 0 18px; }
+
+  /* ===== الاستقبال ===== */
+  .scan input { font-size: 22px; letter-spacing: .04em; padding: 14px; }
+  .bk { border: 1.5px solid var(--line); border-radius: 12px; padding: 14px; margin-top: 14px; }
+  .bk dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; margin: 0 0 12px; }
+  .bk dt { color: var(--ink-2); }
+  .bk dd { margin: 0; font-weight: 500; }
+  .bk .head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .bk .head .qno { font-size: 30px; color: var(--brand); }
+  .tag { display: inline-block; border-radius: 99px; padding: 2px 10px; font-size: 13px; font-weight: 500; background: var(--brand-soft); color: var(--brand); }
+  .tag.waiting { background: var(--gold-soft); color: var(--gold); }
+  .tag.serving { background: var(--brand-soft); color: var(--brand); }
+  .tag.attended { background: var(--accent-soft); color: var(--accent); }
+  .tag.noshow, .tag.cancelled { background: var(--danger-soft); color: var(--danger); }
+  .done-box { text-align: center; padding: 22px 10px; }
+  .done-box .qno { font-size: 64px; color: var(--accent); line-height: 1.1; display: block; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 14px; }
+  .stats div { background: var(--paper); border-radius: 10px; padding: 8px 10px; }
+  .stats b { display: block; font-size: 22px; }
+  .stats span { font-size: 13px; color: var(--ink-2); }
+  .tbl { width: 100%; border-collapse: collapse; font-size: 14.5px; }
+  .tbl th { text-align: right; color: var(--ink-2); font-weight: 500; padding: 6px 8px; border-bottom: 1.5px solid var(--line); }
+  .tbl td { padding: 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+  .scroll { overflow-x: auto; max-height: 520px; overflow-y: auto; }
+  video.cam { width: 100%; border-radius: 12px; background: #000; margin-top: 10px; max-height: 300px; object-fit: cover; }
+
+  /* ===== الشباك ===== */
+  .now { text-align: center; padding: 26px 18px; border-top: 6px solid var(--gold); }
+  .now .lbl { color: var(--ink-2); font-size: 15px; }
+  .now .qno { font-size: clamp(64px, 11vw, 120px); line-height: 1.05; display: block; margin: 6px 0; }
+  .now .svc { font-size: 19px; font-weight: 500; }
+  .now .meta { color: var(--ink-2); font-size: 14px; margin-top: 4px; }
+  .now.empty .qno { color: var(--line); }
+  .acts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 18px; }
+  .acts .btn { padding: 15px; font-size: 17px; }
+  .xfer { display: flex; gap: 8px; margin-top: 10px; }
+  .xfer select { flex: 1; }
+  .wl li { display: flex; align-items: center; gap: 12px; padding: 10px 4px; border-bottom: 1px solid var(--line); }
+  .wl { list-style: none; margin: 0; padding: 0; }
+  .wl .qno { font-size: 20px; min-width: 92px; }
+  .wl .info { flex: 1; min-width: 0; }
+  .wl .info small { display: block; color: var(--ink-2); }
+  .wl .from { color: var(--gold); font-weight: 500; }
+  .empty-note { color: var(--ink-2); text-align: center; padding: 24px 8px; }
+  .others { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+  .others div { background: var(--paper); border-radius: 10px; padding: 8px 10px; font-size: 14px; }
+  .others b { display: block; font-size: 18px; }
+
+  /* ===== الإدارة ===== */
+  .chips { display: flex; flex-wrap: wrap; gap: 6px; }
+  .chip { border: 1.5px solid var(--line); background: var(--surface); border-radius: 99px; padding: 3px 10px; font-size: 13px; cursor: pointer; }
+  .chip[aria-pressed="true"] { background: var(--brand); border-color: var(--brand); color: var(--brand-ink); }
+  .win-row { border: 1px solid var(--line); border-radius: 12px; padding: 12px; margin-bottom: 10px; }
+  .win-row .top { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; flex-wrap: wrap; }
+  .win-row .top input[type=text] { flex: 1; min-width: 160px; }
+  .win-row .top input.ord { width: 70px; flex: none; }
+  .check { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; margin: 0; }
+  .check input { width: auto; }
+  .link-box { display: flex; gap: 8px; }
+  .link-box input { flex: 1; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+const API_URL = 'https://script.google.com/macros/s/AKfycbxjgX1FjxsbrFJyvWLOxcp8u6zaZVUZfQjG6O6fdBf04ePdzoNW1G--48qdSN9rU6Lwgg/exec';
+const KEY = 'nuca_staff_v1';
+const POLL_MS = 5000;
+
+const root = document.getElementById('root');
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem(k)); } catch (_) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (_) {} },
+  del(k) { try { localStorage.removeItem(k); } catch (_) {} },
+};
+let S = store.get(KEY); // { token, user, cities, cityId, tab, windowId }
+const save = () => (S ? store.set(KEY, S) : store.del(KEY));
+
+const esc = (v) => String(v == null ? '' : v).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const alertBox = (m, ok) => (m ? `<div class="alert ${ok ? 'ok' : ''}" role="${ok ? 'status' : 'alert'}">${esc(m)}</div>` : '');
+const arNum = (n) => String(n).replace(/\d/g, (d) => '٠١٢٣٤٥٦٧٨٩'[d]);
+const mins = (ms) => Math.max(0, Math.floor(ms / 60000));
+const ago = (ms) => { const m = mins(ms); return m < 1 ? 'دلوقتي' : 'من ' + arNum(m) + ' دقيقة'; };
+function busy(btn, t) { btn.disabled = true; btn.dataset.l = btn.innerHTML; btn.innerHTML = `<span class="spinner"></span>${t || ''}`; }
+function idle(btn) { if (btn && btn.dataset.l) { btn.disabled = false; btn.innerHTML = btn.dataset.l; } }
+
+async function api(action, payload = {}) {
+  let res;
+  try {
+    res = await fetch(API_URL, { method: 'POST', body: JSON.stringify(Object.assign({ action, token: S && S.token }, payload)) });
+  } catch (_) { throw new Error('مفيش اتصال بالنت. اتأكد من الاتصال وحاول تاني.'); }
+  let j;
+  try { j = await res.json(); } catch (_) { throw new Error('السيرفر مردش صح، حاول تاني.'); }
+  if (!j.ok) {
+    if (/سجل دخول/.test(j.error || '')) { S = null; save(); stopPoll(); showLogin(j.error); }
+    throw new Error(j.error);
+  }
+  return j.data;
+}
+
+// السكانر لو الكيبورد عربي بيكتب حروف عربي مكان الإنجليزي
+const AR_KEYS = { 'ض': 'Q', 'ص': 'W', 'ث': 'E', 'ق': 'R', 'ف': 'T', 'غ': 'Y', 'ع': 'U', 'ه': 'I', 'خ': 'O', 'ح': 'P', 'ش': 'A', 'س': 'S', 'ي': 'D', 'ب': 'F', 'ل': 'G', 'ا': 'H', 'ت': 'J', 'ن': 'K', 'م': 'L', 'ئ': 'Z', 'ء': 'X', 'ؤ': 'C', 'ر': 'V', 'ى': 'N', 'ة': 'M' };
+function normCode(v) {
+  return String(v || '').trim().replace(/لا/g, 'B').replace(/[\u0600-\u06FF]/g, (c) => AR_KEYS[c] || c)
+    .replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/\s/g, '').toUpperCase();
+}
+const normDigits = (v) => String(v || '').replace(/[٠-٩]/g, (d) => '٠١٢٣٤٥٦٧٨٩'.indexOf(d)).replace(/[۰-۹]/g, (d) => '۰۱۲۳۴۵۶۷۸۹'.indexOf(d)).replace(/[\s-]/g, '');
+
+const ROLE_TABS = {
+  admin: ['reception', 'teller', 'manage'],
+  cityadmin: ['reception', 'teller', 'manage'],
+  reception: ['reception'],
+  teller: ['teller'],
+};
+const TAB_NAMES = { reception: 'الاستقبال', teller: 'الشباك', manage: 'إدارة المدينة' };
+
+// ---------- الدخول ----------
+function showLogin(msg) {
+  root.innerHTML = `
+    <div class="login">
+      <form class="panel" id="f">
+        <img src="icons/logo.png" alt="">
+        <h1>لوحة موظفي مراكز الخدمة</h1>
+        ${alertBox(msg)}
+        <div class="field"><label for="u">اسم المستخدم</label><input class="ltr" id="u" autocomplete="username" autocapitalize="none" required></div>
+        <div class="field"><label for="p">كلمة السر</label><input class="ltr" id="p" type="password" autocomplete="current-password" required></div>
+        <button class="btn wide" id="go">دخول</button>
+      </form>
+    </div>`;
+  document.getElementById('u').focus();
+  document.getElementById('f').onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('go'); busy(btn, 'جاري الدخول');
+    try {
+      const prev = store.get(KEY + '_prefs') || {};
+      const r = await api('login', { username: document.getElementById('u').value.trim(), password: document.getElementById('p').value });
+      S = { token: r.token, user: r.user, cities: r.cities, cityId: prev.cityId, windowId: prev.windowId, tab: '' };
+      if (!S.cities.some((c) => c.id === S.cityId)) S.cityId = S.cities[0] && S.cities[0].id;
+      save(); shell();
+    } catch (err) { showLogin(err.message); }
+  };
+}
+
+// ---------- الهيكل ----------
+function shell() {
+  const tabs = ROLE_TABS[S.user.role] || ['reception'];
+  if (!tabs.includes(S.tab)) S.tab = tabs[0];
+  if (!S.cities.length) { root.innerHTML = '<main>' + alertBox('حسابك مش مربوط بأي مدينة. كلّم مدير المدينة.') + '</main>'; return; }
+  root.innerHTML = `
+    <header class="bar">
+      <img src="icons/logo.png" alt="">
+      <div class="title">مراكز خدمات المواطنين<small>هيئة المجتمعات العمرانية الجديدة</small></div>
+      <div class="grow"></div>
+      ${S.cities.length > 1
+        ? `<label class="who" for="city" style="margin:0">المدينة</label><select id="city" style="width:auto">${S.cities.map((c) => `<option value="${esc(c.id)}" ${c.id === S.cityId ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}</select>`
+        : `<span class="who">${esc(S.cities[0].name)}</span>`}
+      <span class="who">${esc(S.user.displayName || S.user.username)} · ${esc(S.user.roleName)}</span>
+      <button class="out" id="out">خروج</button>
+    </header>
+    ${tabs.length > 1 ? `<nav class="tabs" role="tablist">${tabs.map((t) => `<button role="tab" data-t="${t}" aria-selected="${t === S.tab}">${TAB_NAMES[t]}</button>`).join('')}</nav>` : '<div class="tabs" style="height:4px;padding:0"></div>'}
+    <main id="main"></main>`;
+  const city = document.getElementById('city');
+  if (city) city.onchange = () => { S.cityId = city.value; S.windowId = ''; keepPrefs(); shell(); };
+  document.getElementById('out').onclick = () => { api('logout').catch(() => {}); stopPoll(); S = null; save(); showLogin(); };
+  document.querySelectorAll('.tabs [data-t]').forEach((b) => b.onclick = () => { S.tab = b.dataset.t; save(); shell(); });
+  stopPoll();
+  ({ reception: showReception, teller: showTeller, manage: showManage })[S.tab]();
+}
+function keepPrefs() { save(); store.set(KEY + '_prefs', { cityId: S.cityId, windowId: S.windowId }); }
+const cityName = () => (S.cities.find((c) => c.id === S.cityId) || {}).name || '';
+
+let pollTimer = null;
+function stopPoll() { clearTimeout(pollTimer); pollTimer = null; }
+
+// ---------- الاستقبال ----------
+let camStream = null;
+function stopCam() { if (camStream) camStream.getTracks().forEach((t) => t.stop()); camStream = null; }
+
+function showReception() {
+  const main = document.getElementById('main');
+  main.innerHTML = `
+    <div class="cols">
+      <section class="panel scan">
+        <h2>تأكيد حضور المواطن</h2>
+        <p class="hint">امسح الـ QR أو الباركود اللي على كارت الحجز، أو اكتب كود الحجز. بعدها طابق الرقم القومي مع أصل البطاقة.</p>
+        <form id="lf" class="row" autocomplete="off">
+          <div style="flex:3"><label for="code">كود الحجز</label><input class="ltr" id="code" placeholder="OB-A-261101-007" autocomplete="off" spellcheck="false"></div>
+          <div style="flex:none;min-width:0"><button class="btn" id="find">بحث</button></div>
+        </form>
+        ${'BarcodeDetector' in window ? '<button class="btn ghost small" id="camBtn" style="margin-top:10px">مسح بكاميرا الجهاز</button><video class="cam" id="cam" playsinline muted hidden></video>' : ''}
+        <div id="res"></div>
+      </section>
+      <section class="panel">
+        <div class="row" style="align-items:center;margin-bottom:10px"><h3 style="margin:0">حجوزات النهارده في ${esc(cityName())}</h3><div style="flex:none;min-width:0"><button class="btn ghost small" id="ref">تحديث</button></div></div>
+        <div id="today"><div class="empty-note"><span class="spinner"></span></div></div>
+      </section>
+    </div>`;
+  const code = document.getElementById('code');
+  code.focus();
+  document.getElementById('lf').onsubmit = (e) => { e.preventDefault(); lookup(code.value); };
+  document.getElementById('ref').onclick = loadToday;
+  const camBtn = document.getElementById('camBtn');
+  if (camBtn) camBtn.onclick = () => (camStream ? (stopCam(), document.getElementById('cam').hidden = true) : startCam());
+  loadToday();
+}
+
+async function startCam() {
+  const video = document.getElementById('cam');
+  try {
+    camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+  } catch (_) { document.getElementById('res').innerHTML = alertBox('مقدرناش نفتح الكاميرا. اسمح للمتصفح باستخدامها أو استخدم السكانر.'); return; }
+  video.srcObject = camStream; video.hidden = false; await video.play();
+  const det = new BarcodeDetector({ formats: ['qr_code', 'code_128'] });
+  const tick = async () => {
+    if (!camStream) return;
+    try {
+      const found = await det.detect(video);
+      if (found.length) { stopCam(); video.hidden = true; document.getElementById('code').value = found[0].rawValue; return lookup(found[0].rawValue); }
+    } catch (_) {}
+    requestAnimationFrame(tick);
+  };
+  tick();
+}
+
+async function lookup(raw) {
+  const res = document.getElementById('res');
+  const c = normCode(raw);
+  if (!c) return;
+  document.getElementById('code').value = c;
+  res.innerHTML = '<div class="empty-note"><span class="spinner"></span></div>';
+  try {
+    const b = await api('lookupBooking', { code: c });
+    renderBooking(b);
+  } catch (e) { res.innerHTML = alertBox(e.message); document.getElementById('code').select(); }
+}
+
+function renderBooking(b, msg) {
+  const res = document.getElementById('res');
+  const can = b.status === 'booked' && b.isToday;
+  const why = b.status !== 'booked' ? 'الحجز ده حالته: ' + b.statusLabel : !b.isToday ? 'الحجز ده مش بتاريخ النهارده' : '';
+  res.innerHTML = `
+    <div class="bk">
+      <div class="head"><span class="qno">${esc(b.queueNo)}</span><span class="tag ${esc(b.status)}">${esc(b.statusLabel)}</span></div>
+      <dl>
+        <dt>الخدمة</dt><dd>${esc(b.serviceName)}</dd>
+        <dt>المدينة</dt><dd>${esc(b.cityName)}</dd>
+        <dt>تاريخ الحجز</dt><dd>${esc(b.date)}</dd>
+        <dt>الرقم القومي</dt><dd><bdi dir="ltr">${esc(b.nidMasked)}</bdi></dd>
+        ${b.customerName ? `<dt>الاسم</dt><dd>${esc(b.customerName)}</dd>` : ''}
+        <dt>كود الحجز</dt><dd><bdi dir="ltr">${esc(b.code)}</bdi></dd>
+      </dl>
+      ${alertBox(msg || why)}
+      ${can ? `
+        <form id="cf">
+          <div class="field"><label for="nid">الرقم القومي من أصل البطاقة</label><input class="ltr" id="nid" inputmode="numeric" maxlength="20" autocomplete="off" style="font-size:20px"></div>
+          <button class="btn green wide" id="ok">تأكيد الحضور ودخول الانتظار</button>
+        </form>` : '<button class="btn ghost wide" id="next">حجز تاني</button>'}
+    </div>`;
+  if (can) {
+    const nid = document.getElementById('nid'); nid.focus();
+    document.getElementById('cf').onsubmit = async (e) => {
+      e.preventDefault();
+      const v = normDigits(nid.value);
+      if (!/^\d{14}$/.test(v)) return renderBooking(b, 'الرقم القومي لازم يكون 14 رقم');
+      const btn = document.getElementById('ok'); busy(btn, 'جاري التأكيد');
+      try {
+        const r = await api('checkIn', { code: b.code, nationalId: v });
+        res.innerHTML = `
+          <div class="bk done-box">
+            <div class="hint" style="margin:0">قول للمواطن رقم دوره</div>
+            <span class="qno">${esc(r.queueNo)}</span>
+            <div>${esc(r.serviceName)}</div>
+            <div class="hint" style="margin:6px 0 14px">${r.ahead ? 'قدامه ' + arNum(r.ahead) + ' في الانتظار' : 'هو الأول في الانتظار'}</div>
+            <button class="btn wide" id="next">المواطن اللي بعده</button>
+          </div>`;
+        document.getElementById('next').onclick = resetScan;
+        document.getElementById('next').focus();
+        loadToday();
+      } catch (err) { renderBooking(b, err.message); }
+    };
+  } else document.getElementById('next').onclick = resetScan;
+}
+function resetScan() { document.getElementById('res').innerHTML = ''; const c = document.getElementById('code'); c.value = ''; c.focus(); }
+
+async function loadToday() {
+  const box = document.getElementById('today');
+  if (!box) return;
+  try {
+    const { bookings } = await api('bookings', { cityId: S.cityId });
+    const n = (st) => bookings.filter((b) => b.status === st).length;
+    box.innerHTML = `
+      <div class="stats">
+        <div><b>${arNum(bookings.length - n('cancelled'))}</b><span>إجمالي</span></div>
+        <div><b>${arNum(n('booked'))}</b><span>لسه محضروش</span></div>
+        <div><b>${arNum(n('waiting') + n('serving'))}</b><span>في المركز</span></div>
+        <div><b>${arNum(n('attended'))}</b><span>خلصوا</span></div>
+      </div>
+      ${bookings.length ? `<div class="scroll"><table class="tbl"><thead><tr><th>الدور</th><th>الخدمة</th><th>الحالة</th><th>الشباك</th></tr></thead><tbody>
+        ${bookings.map((b) => `<tr><td class="qno">${esc(b.queueNo)}</td><td>${esc(b.serviceName)}</td><td><span class="tag ${esc(b.status)}">${esc(b.statusLabel)}</span></td><td>${esc(b.window || '')}</td></tr>`).join('')}
+      </tbody></table></div>` : '<div class="empty-note">مفيش حجوزات النهارده.</div>'}`;
+  } catch (e) { box.innerHTML = alertBox(e.message); }
+}
+
+// ---------- الشباك ----------
+let Q = null; // آخر حالة للطابور
+
+function showTeller() {
+  Q = null;
+  document.getElementById('main').innerHTML = '<div class="empty-note"><span class="spinner"></span> جاري تحميل الطابور</div>';
+  pollQueue();
+}
+
+async function pollQueue() {
+  stopPoll();
+  try {
+    const r = await api('queue', { cityId: S.cityId, v: Q && Q.v });
+    if (!r.same) { Q = r; Q.skew = Date.now() - r.now; renderTeller(); }
+  } catch (e) { if (!S) return; if (!Q) document.getElementById('main').innerHTML = alertBox(e.message); }
+  if (S && S.tab === 'teller') pollTimer = setTimeout(pollQueue, document.hidden ? POLL_MS * 3 : POLL_MS);
+}
+
+function myWindow() { return Q && Q.windows.find((w) => w.id === S.windowId && w.active); }
+function visible(win) {
+  return Q.tickets.filter((t) => t.st === 'waiting' && (t.win ? t.win === win.id : (!win.serviceIds.length || win.serviceIds.includes(t.svc))));
+}
+
+function renderTeller(msg, okMsg) {
+  const main = document.getElementById('main');
+  if (!main) return;
+  const wins = Q.windows.filter((w) => w.active);
+  if (!wins.length) { main.innerHTML = `<div class="panel">${alertBox('مفيش شبابيك متسجلة للمدينة دي. مدير المدينة يضيفها من "إدارة المدينة".')}</div>`; return; }
+  const win = myWindow();
+  if (!win) {
+    main.innerHTML = `
+      <section class="panel" style="max-width:520px;margin:0 auto">
+        <h2>اختار الشباك اللي هتشتغل عليه</h2>
+        <p class="hint">${esc(cityName())}</p>
+        <ul class="wl">${wins.map((w) => `<li><div class="info"><b>${esc(w.name)}</b><small>${Q.serving[w.id] ? 'فيه موظف شغال عليه دلوقتي' : 'فاضي'}</small></div><button class="btn small" data-w="${esc(w.id)}">اختيار</button></li>`).join('')}</ul>
+      </section>`;
+    main.querySelectorAll('[data-w]').forEach((b) => b.onclick = () => { S.windowId = b.dataset.w; keepPrefs(); renderTeller(); });
+    return;
+  }
+  const cur = Q.tickets.find((t) => t.code === Q.serving[win.id]);
+  const list = visible(win);
+  const now = Date.now() - (Q.skew || 0);
+  const others = wins.filter((w) => w.id !== win.id);
+  const kept = document.getElementById('xferTo') && document.getElementById('xferTo').value;
+  main.innerHTML = `
+    <div class="cols">
+      <section>
+        <div class="panel now ${cur ? '' : 'empty'}">
+          <div class="row" style="align-items:center;margin-bottom:6px">
+            <div style="text-align:right"><b>${esc(win.name)}</b></div>
+            <div style="flex:none;min-width:0"><button class="btn ghost small" id="chg">تغيير الشباك</button></div>
+          </div>
+          ${alertBox(msg)}${alertBox(okMsg, true)}
+          <div class="lbl">${cur ? 'الرقم اللي عندك' : 'مفيش حد عند الشباك'}</div>
+          <span class="qno">${cur ? esc(cur.q) : '—'}</span>
+          ${cur ? `<div class="svc">${esc(cur.svcName)}</div>
+            <div class="meta">${cur.name ? esc(cur.name) + ' · ' : ''}اتنادى ${ago(now - cur.at)}${cur.from ? ' · محوّل من ' + esc(cur.from) : ''}</div>
+            <div class="acts">
+              <button class="btn green" id="done">تم</button>
+              <button class="btn gold" id="recall">إعادة نداء</button>
+            </div>
+            <div class="xfer">
+              <select id="xferTo" aria-label="تحويل لشباك"><option value="">تحويل لشباك تاني</option>${others.map((w) => `<option value="${esc(w.id)}" ${w.id === kept ? 'selected' : ''}>${esc(w.name)}</option>`).join('')}</select>
+              <button class="btn ghost" id="xfer">تحويل</button>
+            </div>
+            <button class="btn red wide" id="noshow" style="margin-top:10px">لم يحضر</button>`
+          : `<button class="btn wide" id="call" style="margin-top:16px;padding:18px;font-size:19px" ${list.length ? '' : 'disabled'}>نداء الرقم التالي${list.length ? ' · ' + esc(list[0].q) : ''}</button>`}
+        </div>
+        <div class="panel" style="margin-top:18px">
+          <h3>باقي الشبابيك</h3>
+          <div class="others">${others.map((w) => { const t = Q.tickets.find((x) => x.code === Q.serving[w.id]); return `<div>${esc(w.name)}<b class="qno">${t ? esc(t.q) : '—'}</b></div>`; }).join('') || '<span class="hint">مفيش</span>'}</div>
+        </div>
+      </section>
+      <section class="panel">
+        <h3>في انتظار الشباك ده (${arNum(list.length)})</h3>
+        ${list.length ? `<ul class="wl">${list.map((t) => `
+          <li><span class="qno">${esc(t.q)}</span>
+            <div class="info">${esc(t.svcName)}<small>${t.from ? `<span class="from">محوّل من ${esc(t.from)}</span> · ` : ''}وصل ${ago(now - t.in)}</small></div>
+            <button class="btn ghost small" data-call="${esc(t.code)}" ${cur ? 'disabled' : ''}>نداء</button></li>`).join('')}</ul>`
+          : '<div class="empty-note">مفيش حد في الانتظار للشباك ده.</div>'}
+      </section>
+    </div>`;
+  document.getElementById('chg').onclick = () => { S.windowId = ''; keepPrefs(); renderTeller(); };
+  const act = (id, action, extra, done) => {
+    const b = document.getElementById(id);
+    if (b) b.onclick = () => run(b, action, extra, done);
+  };
+  act('call', 'tellerCall', {});
+  act('recall', 'tellerRecall', {}, 'اتنادى تاني على الشاشة');
+  act('done', 'tellerFinish', { result: 'done' });
+  act('noshow', 'tellerFinish', { result: 'noshow' });
+  const xfer = document.getElementById('xfer');
+  if (xfer) xfer.onclick = () => {
+    const to = document.getElementById('xferTo').value;
+    if (!to) return renderTeller('اختار الشباك اللي هتحوّل له');
+    run(xfer, 'tellerTransfer', { toWindowId: to }, 'اتحوّل لـ ' + (Q.windows.find((w) => w.id === to) || {}).name);
+  };
+  main.querySelectorAll('[data-call]').forEach((b) => b.onclick = () => run(b, 'tellerCall', { code: b.dataset.call }));
+}
+
+async function run(btn, action, extra, okMsg) {
+  if (action === 'tellerFinish' && extra.result === 'noshow' && !confirm('متأكد إن المواطن محضرش؟ الرقم هيخرج من الطابور.')) return;
+  busy(btn);
+  try {
+    await api(action, Object.assign({ cityId: S.cityId, windowId: S.windowId }, extra));
+    const r = await api('queue', { cityId: S.cityId });
+    Q = r; Q.skew = Date.now() - r.now;
+    renderTeller('', okMsg);
+  } catch (e) { idle(btn); renderTeller(e.message); }
+}
+
+// ---------- إدارة المدينة ----------
+let A = null;
+const ROLE_OPTS = { reception: 'استقبال', teller: 'موظف شباك', cityadmin: 'مدير مدينة' };
+
+async function showManage(msg, okMsg) {
+  const main = document.getElementById('main');
+  if (!A || A.city.id !== S.cityId) main.innerHTML = '<div class="empty-note"><span class="spinner"></span></div>';
+  try { A = await api('cityAdmin', { cityId: S.cityId }); }
+  catch (e) { main.innerHTML = alertBox(e.message); return; }
+  const displayUrl = new URL('display.html#' + S.cityId, location.href).href;
+  const roles = Object.entries(ROLE_OPTS).filter(([r]) => r !== 'cityadmin' || S.user.role === 'admin');
+  main.innerHTML = `
+    ${alertBox(msg)}${alertBox(okMsg, true)}
+    <div class="cols">
+      <section class="panel">
+        <h2>شبابيك مركز ${esc(A.city.name)}</h2>
+        <p class="hint">الاسم هو اللي بيظهر للجمهور على الشاشة. حدد خدمات كل شباك، ولو مفيش خدمة متحددة الشباك بياخد كل الخدمات. الترتيب بيحدد مكانه على الشاشة.</p>
+        <form class="row" id="addW" style="margin-bottom:14px">
+          <div><label for="cnt">إضافة شبابيك</label><input id="cnt" type="number" min="1" max="30" value="1" inputmode="numeric"></div>
+          <div style="flex:none;min-width:0"><button class="btn">إضافة</button></div>
+        </form>
+        ${A.windows.length ? A.windows.map((w) => `
+          <div class="win-row" data-id="${esc(w.id)}">
+            <div class="top">
+              <input type="text" class="nm" value="${esc(w.name)}" aria-label="اسم الشباك" maxlength="40">
+              <input type="number" class="ord" value="${esc(w.order)}" aria-label="الترتيب" min="0">
+              <label class="check"><input type="checkbox" class="act" ${w.active ? 'checked' : ''}> شغال</label>
+              <button class="btn small sv">حفظ</button>
+            </div>
+            <div class="chips">${A.services.map((s) => `<button type="button" class="chip" data-s="${esc(s.id)}" aria-pressed="${w.serviceIds.includes(s.id)}">${esc(s.code)} · ${esc(s.name)}</button>`).join('')}</div>
+          </div>`).join('') : '<div class="empty-note">مفيش شبابيك لسه. ضيف عدد الشبابيك اللي في المركز.</div>'}
+        <h3 style="margin-top:22px">شاشة الجمهور</h3>
+        <p class="hint">افتح اللينك ده على التلفزيون أو الشاشة اللي في صالة الانتظار، واضغط "تشغيل الشاشة" علشان الصوت يشتغل.</p>
+        <div class="link-box"><input class="ltr" id="dl" readonly value="${esc(displayUrl)}"><button class="btn ghost" id="cp">نسخ</button><a class="btn ghost" href="${esc(displayUrl)}" target="_blank" rel="noopener">فتح</a></div>
+      </section>
+      <section class="panel">
+        <h2>حسابات الموظفين</h2>
+        <p class="hint">كل موظف بحساب باسمه، علشان كل حجز يتسجل مين اللي خدمه.</p>
+        <form id="uf">
+          <div class="row">
+            <div><label for="un">اسم المستخدم</label><input class="ltr" id="un" autocapitalize="none" placeholder="ahmed.ob" required></div>
+            <div><label for="dn">الاسم</label><input id="dn" placeholder="أحمد محمد"></div>
+          </div>
+          <div class="row" style="margin-top:10px">
+            <div><label for="rl">الدور</label><select id="rl">${roles.map(([r, n]) => `<option value="${r}">${n}</option>`).join('')}</select></div>
+            <div><label for="pw">كلمة السر</label><input class="ltr" id="pw" type="text" autocomplete="new-password" placeholder="6 حروف على الأقل"></div>
+          </div>
+          <button class="btn wide" style="margin-top:12px" id="us">إضافة الموظف</button>
+        </form>
+        <div class="scroll" style="margin-top:16px">
+          <table class="tbl"><thead><tr><th>المستخدم</th><th>الدور</th><th>الحالة</th><th></th></tr></thead><tbody>
+          ${A.users.map((u) => `<tr>
+            <td><bdi dir="ltr">${esc(u.username)}</bdi><br><small class="hint">${esc(u.displayName)}</small></td>
+            <td>${esc(ROLE_OPTS[u.role] || u.role)}</td>
+            <td>${u.active ? 'شغال' : '<span class="tag noshow">موقوف</span>'}</td>
+            <td style="white-space:nowrap">${u.username === S.user.username ? '' : `
+              <button class="btn ghost small" data-pw="${esc(u.username)}">كلمة سر جديدة</button>
+              <button class="btn ghost small" data-tg="${esc(u.username)}">${u.active ? 'إيقاف' : 'تشغيل'}</button>`}</td></tr>`).join('')}
+          </tbody></table>
+        </div>
+      </section>
+    </div>`;
+
+  document.getElementById('addW').onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('button'); busy(btn);
+    try { await api('addWindows', { cityId: S.cityId, count: Number(document.getElementById('cnt').value) }); showManage('', 'اتضافت الشبابيك'); }
+    catch (err) { idle(btn); showManage(err.message); }
+  };
+  main.querySelectorAll('.chip').forEach((c) => c.onclick = () => c.setAttribute('aria-pressed', c.getAttribute('aria-pressed') !== 'true'));
+  main.querySelectorAll('.win-row').forEach((row) => {
+    row.querySelector('.sv').onclick = async (e) => {
+      const btn = e.currentTarget; busy(btn);
+      const win = {
+        id: row.dataset.id, cityId: S.cityId, name: row.querySelector('.nm').value.trim(),
+        order: row.querySelector('.ord').value, active: row.querySelector('.act').checked,
+        serviceIds: [...row.querySelectorAll('.chip[aria-pressed="true"]')].map((c) => c.dataset.s),
+      };
+      try { await api('saveWindow', { window: win }); showManage('', 'اتحفظ ' + win.name); }
+      catch (err) { idle(btn); showManage(err.message); }
+    };
+  });
+  document.getElementById('cp').onclick = async () => {
+    const el = document.getElementById('dl');
+    try { await navigator.clipboard.writeText(el.value); } catch (_) { el.select(); document.execCommand('copy'); }
+    document.getElementById('cp').textContent = 'اتنسخ';
+  };
+  document.getElementById('uf').onsubmit = async (e) => {
+    e.preventDefault();
+    const btn = document.getElementById('us'); busy(btn, 'جاري الإضافة');
+    const user = {
+      isNew: true, username: document.getElementById('un').value.trim().toLowerCase(), displayName: document.getElementById('dn').value.trim(),
+      role: document.getElementById('rl').value, password: document.getElementById('pw').value, cities: [S.cityId],
+    };
+    try { await api('saveUser', { user }); showManage('', 'اتضاف ' + user.username + '. ابعتله اسم المستخدم وكلمة السر.'); }
+    catch (err) { idle(btn); showManage(err.message); }
+  };
+  const findU = (n) => A.users.find((u) => u.username === n);
+  const saveU = async (btn, u, extra, ok) => {
+    busy(btn);
+    try { await api('saveUser', { user: Object.assign({ username: u.username, displayName: u.displayName, role: u.role, active: u.active, cities: [S.cityId] }, extra) }); showManage('', ok); }
+    catch (err) { idle(btn); showManage(err.message); }
+  };
+  main.querySelectorAll('[data-pw]').forEach((b) => b.onclick = () => {
+    const pw = prompt('كلمة السر الجديدة لـ ' + b.dataset.pw + ' (6 حروف على الأقل)');
+    if (pw) saveU(b, findU(b.dataset.pw), { password: pw }, 'اتغيرت كلمة السر');
+  });
+  main.querySelectorAll('[data-tg]').forEach((b) => b.onclick = () => {
+    const u = findU(b.dataset.tg);
+    saveU(b, u, { active: !u.active }, u.active ? 'اتوقف الحساب' : 'اتشغل الحساب');
+  });
+}
+
+// ---------- البداية ----------
+document.addEventListener('visibilitychange', () => { if (!document.hidden && S && S.tab === 'teller' && pollTimer) pollQueue(); });
+if (S && S.token) {
+  shell();
+  api('me').then((r) => { S.user = r.user; S.cities = r.cities; save(); }).catch(() => {});
+} else showLogin();
+</script>
+</body>
+</html>

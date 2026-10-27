@@ -1,6 +1,6 @@
 // بيخلي الصفحة تفتح حتى لو النت ضعيف أو مقطوع، وبيجيب أحدث نسخة لما النت يبقى متاح.
 // طلبات السيرفر (script.google.com) مبتتخزنش أبدًا.
-const CACHE = 'cb-shell-v5';
+const CACHE = 'cb-shell-v6';
 const SHELL = ['./', './index.html', './manifest.webmanifest', './icons/icon-192.png', './icons/icon-512.png', './icons/logo.png'];
 
 self.addEventListener('install', (e) => {
@@ -22,11 +22,13 @@ self.addEventListener('fetch', (e) => {
   if (url.origin !== self.location.origin) return; // السيرفر والخطوط والـ QR تعدّي عادي
 
   // الصفحة نفسها: من النت الأول، ولو مفيش نت من النسخة المحفوظة
+  // كل صفحة بتتحفظ باسمها (index و staff و display)، مش كلهم على index
   if (req.mode === 'navigate') {
+    const key = new Request(url.origin + url.pathname);
     e.respondWith(
       fetch(req)
-        .then((res) => { const copy = res.clone(); caches.open(CACHE).then((c) => c.put('./index.html', copy)); return res; })
-        .catch(() => caches.match('./index.html'))
+        .then((res) => { if (res.ok) { const copy = res.clone(); caches.open(CACHE).then((c) => c.put(key, copy)); } return res; })
+        .catch(() => caches.match(key).then((hit) => hit || caches.match('./index.html')))
     );
     return;
   }
