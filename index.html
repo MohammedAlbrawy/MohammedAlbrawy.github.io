@@ -187,11 +187,6 @@
   .legend span::before { content: ""; display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-inline-end: 6px; vertical-align: -1px; }
   .legend .ok::before { background: #2E7D32; } .legend .no::before { background: #C62828; }
 
-  /* ===== اختيار من اتنين (الدفع) ===== */
-  .seg { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 14px; }
-  .seg button { border: 1.5px solid var(--line); background: var(--surface); border-radius: 12px; padding: 13px; font-size: 17px; font-weight: 700; cursor: pointer; }
-  .seg button[aria-pressed="true"] { border-color: var(--brand); background: var(--brand-soft); color: var(--brand); box-shadow: inset 0 0 0 1px var(--brand); }
-
   /* ===== كارت الحجز ===== */
   .card { background: #fff; color: #10222F; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; margin: 0 0 14px;
     -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -274,7 +269,7 @@
 
 <script>
 // ===== لينك الـ Web App =====
-const API_URL = 'https://script.google.com/macros/s/AKfycbwdwZ7ufqhUOjArfn19wt7E0nsJRrbHBC0trmNJFKsielr2ZZpARUnWOpR-LO6-qe176g/exec';
+const API_URL = 'https://script.google.com/macros/s/AKfycbxjgX1FjxsbrFJyvWLOxcp8u6zaZVUZfQjG6O6fdBf04ePdzoNW1G--48qdSN9rU6Lwgg/exec';
 
 // ===== أقسام الخدمات (عدّل الأسماء من هنا) =====
 const CATEGORIES = [
@@ -307,7 +302,7 @@ const ICONS = {
 document.querySelectorAll('[data-icon]').forEach((el) => { el.outerHTML = ICONS[el.dataset.icon]; });
 
 
-const state = { config: null, nid: '', name: '', cityId: '', serviceId: '', date: '', slot: '', payment: '', days: [], slots: [], next: '' };
+const state = { config: null, nid: '', name: '', cityId: '', serviceId: '', date: '', slot: '', days: [], slots: [], next: '' };
 const app = document.getElementById('app');
 const avail = {};
 
@@ -320,7 +315,10 @@ async function api(action, payload) {
     throw new Error('مفيش اتصال بالإنترنت، اتأكد من النت وحاول تاني');
   }
   const j = await res.json().catch(() => ({ ok: false, error: 'السيستم مش بيرد دلوقتي، حاول تاني بعد شوية' }));
-  if (!j.ok) throw new Error(j.error);
+  if (!j.ok) {
+    if (/سجل دخول/.test(j.error || '') && typeof setSession === 'function') setSession(null);
+    throw new Error(j.error);
+  }
   return j.data;
 }
 
@@ -378,8 +376,9 @@ function setTab(tab) {
 function route() {
   const [path, arg] = location.hash.replace(/^#\/?/, '').split('/');
   if (path === 'cat' && SHOW_CATEGORIES) { setTab('home'); return requireLogin('#/cat/' + arg) && showCategory(arg); }
-  if (path === 'book') { setTab('home'); return startBooking(); }
-  if (path === 'mine') { setTab('mine'); return session ? loadMine() : showNid('mine'); }
+  if (path === 'book') { setTab('home'); return requireLogin('#/book') && startBooking(); }
+  if (path === 'mine') { setTab('mine'); return requireLogin('#/mine') && loadMine(); }
+  if (path === 'delete') { setTab('account'); return requireLogin('#/delete') && showDeleteAccount(); }
   if (path === 'account') { setTab('account'); return session ? showAccount() : showLogin(); }
   if (path === 'login') { setTab('account'); return showLogin(); }
   if (path === 'register') { setTab('account'); return showRegister(); }
@@ -390,7 +389,7 @@ window.addEventListener('hashchange', route);
 function requireLogin(next) {
   if (session) return true;
   state.next = next;
-  showLogin('هذه الخدمة تتطلب تسجيل الدخول. إذا لم يتم إنشاء حساب مسبقًا، يمكنك إنشاء حساب جديد.');
+  showLogin('الحجز ومتابعة الحجوزات محتاجين تسجيل دخول. لو معندكش حساب، اعمل حساب جديد في دقيقة.');
   return false;
 }
 function afterLogin() { const n = state.next || '#/'; state.next = ''; go(n); }
@@ -468,15 +467,6 @@ function showLogin(reason, msg) {
   pwEl.onkeydown = (e) => { if (e.key === 'Enter') submit(); };
 }
 
-const PAY = { cash: 'كاش', visa: 'فيزا' };
-const payToggle = (sel) => `<div class="seg" role="group" aria-label="طريقة الدفع">
-  ${Object.keys(PAY).map((k) => `<button type="button" data-pay="${k}" aria-pressed="${sel === k}">${PAY[k]}</button>`).join('')}</div>`;
-function bindPay(onPick) {
-  app.querySelectorAll('[data-pay]').forEach((b) => b.onclick = () => {
-    app.querySelectorAll('[data-pay]').forEach((x) => x.setAttribute('aria-pressed', x === b));
-    onPick(b.dataset.pay);
-  });
-}
 const nameError = (n) => n.trim().split(/\s+/).length < 4 ? 'اكتب الاسم رباعي' : '';
 
 function showRegister(msg, vals = {}) {
@@ -489,13 +479,10 @@ function showRegister(msg, vals = {}) {
     <div class="field"><label for="nid">الرقم القومي</label><input class="ltr" id="nid" inputmode="numeric" autocomplete="username" maxlength="20" value="${esc(vals.nid || state.nid)}"></div>
     <div class="field"><label for="phone">رقم الموبايل</label><input class="ltr" id="phone" inputmode="tel" autocomplete="tel" maxlength="15" placeholder="01xxxxxxxxx" value="${esc(vals.phone)}"></div>
     <div class="field"><label for="email">البريد الإلكتروني <span style="color:var(--ink-2);font-weight:400">(اختياري)</span></label><input class="ltr" id="email" type="email" inputmode="email" autocomplete="email" value="${esc(vals.email)}"></div>
-    <div class="field"><label>طريقة الدفع المفضلة</label>${payToggle(vals.payment)}</div>
     <div class="field"><label for="pw">كلمة السر</label><input class="ltr" id="pw" type="password" autocomplete="new-password"><div class="sub">٦ حروف أو أرقام على الأقل</div></div>
     <div class="field"><label for="pw2">تأكيد كلمة السر</label><input class="ltr" id="pw2" type="password" autocomplete="new-password"></div>
     <button class="btn" id="go">إنشاء الحساب</button>
     <p class="switch">عندك حساب؟ <button class="link" id="login">تسجيل الدخول</button></p>`;
-  let payment = vals.payment || '';
-  bindPay((v) => { payment = v; });
   document.getElementById('back').onclick = () => history.back();
   document.getElementById('login').onclick = () => go('#/login');
   document.getElementById('go').onclick = async () => {
@@ -504,19 +491,17 @@ function showRegister(msg, vals = {}) {
       nid: normalizeDigits(document.getElementById('nid').value),
       phone: normalizeDigits(document.getElementById('phone').value),
       email: document.getElementById('email').value.trim(),
-      payment,
     };
     const pw = document.getElementById('pw').value, pw2 = document.getElementById('pw2').value;
     const nErr = nameError(v.name); if (nErr) return showRegister(nErr, v);
     const err = nidError(v.nid); if (err) return showRegister(err, v);
     if (!/^01[0125]\d{8}$/.test(v.phone)) return showRegister('رقم الموبايل لازم يكون ١١ رقم ويبدأ بـ 010 أو 011 أو 012 أو 015', v);
     if (v.email && !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.email)) return showRegister('البريد الإلكتروني غير صحيح', v);
-    if (!v.payment) return showRegister('اختار طريقة الدفع المفضلة', v);
     if (pw.length < 6) return showRegister('كلمة السر لازم ٦ حروف على الأقل', v);
     if (pw !== pw2) return showRegister('كلمتين السر مش زي بعض', v);
     const btn = document.getElementById('go'); busy(btn, 'جاري إنشاء الحساب');
     try {
-      const r = await api('register', { name: v.name, nationalId: v.nid, phone: v.phone, email: v.email, payment: v.payment, password: pw });
+      const r = await api('register', { name: v.name, nationalId: v.nid, phone: v.phone, email: v.email, password: pw });
       setSession({ token: r.token, user: r.user, nid: v.nid });
       state.nid = v.nid;
       afterLogin();
@@ -532,61 +517,53 @@ function showAccount() {
     <div class="profile" style="margin-top:14px">
       <div class="avatar">${esc((u.name || '؟').trim()[0])}</div>
       <div><b>${esc(u.name)}</b><span>الرقم القومي: <bdi dir="ltr">${esc(u.nidMasked)}</bdi></span><br><span>الموبايل: <bdi dir="ltr">${esc(u.phone)}</bdi></span>
-        ${u.email ? `<br><span>البريد: <bdi dir="ltr">${esc(u.email)}</bdi></span>` : ''}
-        ${u.payment ? `<br><span>طريقة الدفع المفضلة: ${esc(PAY[u.payment] || '')}</span>` : ''}</div>
+        ${u.email ? `<br><span>البريد: <bdi dir="ltr">${esc(u.email)}</bdi></span>` : ''}</div>
     </div>
     <ul class="list">
       <li><button class="row" id="mine"><span class="ic">${ICONS.ticket}</span><span class="tx">حجوزاتي</span><span class="end">${ICONS.chev}</span></button></li>
       <li><button class="row" id="book"><span class="ic">${ICONS.calendar}</span><span class="tx">احجز ميعاد</span><span class="end">${ICONS.chev}</span></button></li>
     </ul>
-    <button class="btn quiet" id="out">تسجيل خروج</button>`;
+    <button class="btn quiet" id="out">تسجيل خروج</button>
+    <p class="switch"><button class="link" id="del" style="color:var(--danger)">حذف الحساب</button></p>`;
   document.getElementById('mine').onclick = () => go('#/mine');
   document.getElementById('book').onclick = () => go('#/book');
   document.getElementById('out').onclick = () => { setSession(null); state.nid = ''; go('#/'); };
+  document.getElementById('del').onclick = () => go('#/delete');
+}
+
+function showDeleteAccount(msg) {
+  app.innerHTML = `
+    ${backBtn()}
+    <h2 tabindex="-1">حذف الحساب</h2>
+    <p class="hint">هيتمسح حسابك وبياناتك (الاسم والموبايل والإيميل)، وهتتلغي كل حجوزاتك القائمة. الخطوة دي مينفعش ترجع فيها.</p>
+    ${alertBox(msg)}
+    <div class="field"><label for="pw">اكتب كلمة السر للتأكيد</label><input class="ltr" id="pw" type="password" autocomplete="current-password"></div>
+    <button class="btn" id="go" style="background:var(--danger)">احذف حسابي نهائيًا</button>`;
+  document.getElementById('back').onclick = () => go('#/account');
+  document.getElementById('go').onclick = async () => {
+    const pw = document.getElementById('pw').value;
+    if (!pw) return showDeleteAccount('اكتب كلمة السر');
+    const btn = document.getElementById('go'); busy(btn, 'جاري الحذف');
+    try {
+      await api('deleteAccount', { token: session.token, password: pw });
+      setSession(null); state.nid = '';
+      app.innerHTML = '<h2 tabindex="-1">تم حذف الحساب</h2><p class="hint">اتمسح حسابك واتلغت حجوزاتك القائمة.</p><button class="btn" id="home">الرئيسية</button>';
+      document.getElementById('home').onclick = () => go('#/');
+    } catch (e) { if (!session) return requireLogin('#/delete'); showDeleteAccount(e.message); }
+  };
+  focusTop();
 }
 
 // ---------- الحجز ----------
-const STEPS_B = ['بيانات طالب الخدمة', 'المدينة والخدمة', 'الموعد'];
+const STEPS_B = ['تسجيل الدخول', 'المدينة والخدمة', 'الموعد'];
 function stepsBar(i) {
   return '<ol class="steps">' + STEPS_B.map((s, k) => `<li class="${k < i ? 'done' : k === i ? 'now' : ''}"${k === i ? ' aria-current="step"' : ''}>${s}</li>`).join('') + '</ol>';
 }
 
 function startBooking() {
-  Object.assign(state, { cityId: '', serviceId: '', date: '', slot: '', payment: '' });
-  if (session) { state.nid = session.nid; state.name = session.user.name; return showPlace(); }
-  showNid('book');
-}
-
-function showNid(mode, msg) {
-  const forBook = mode === 'book';
-  app.innerHTML = `
-    ${backBtn()}
-    ${forBook ? stepsBar(0) : ''}
-    <h2 tabindex="-1">${forBook ? 'بيانات طالب الخدمة' : 'حجوزاتي'}</h2>
-    <p class="hint">${forBook ? 'برجاء كتابة الرقم القومي لطالب الخدمة، حيث إنه سيتم مراجعة البيانات بالمركز التكنولوجي.' : 'اكتب الرقم القومي اللي حجزت بيه، أو سجل دخول.'}</p>
-    ${alertBox(msg)}
-    ${forBook ? `<div class="field"><label for="name">اسم طالب الخدمة (رباعي)</label><input id="name" autocomplete="name" value="${esc(state.name)}"></div>` : ''}
-    <div class="field"><label for="nid">الرقم القومي (١٤ رقم)</label><input class="ltr" id="nid" inputmode="numeric" autocomplete="off" maxlength="20" value="${esc(state.nid)}" style="font-size:20px;text-align:center"></div>
-    <button class="btn" id="next">${forBook ? 'التالي' : 'اعرض حجوزاتي'}</button>`;
-  const nameEl = document.getElementById('name'), input = document.getElementById('nid');
-  (nameEl && !nameEl.value ? nameEl : input).focus();
-  document.getElementById('back').onclick = () => go('#/');
-  const submit = async () => {
-    // نحفظ اللي اتكتب الأول علشان لو فيه خطأ ميتمسحش
-    const nid = normalizeDigits(input.value);
-    state.nid = nid;
-    if (forBook) {
-      state.name = nameEl.value.trim().replace(/\s+/g, ' ');
-      const nErr = nameError(state.name); if (nErr) return showNid(mode, nErr);
-    }
-    const err = nidError(nid);
-    if (err) return showNid(mode, err);
-    if (forBook) return showPlace();
-    const btn = document.getElementById('next'); busy(btn, 'جاري البحث');
-    try { showMine(await api('myBookings', { nationalId: nid })); } catch (e) { showNid(mode, e.message); }
-  };
-  document.getElementById('next').onclick = submit;
-  input.onkeydown = (e) => { if (e.key === 'Enter') submit(); };
+  Object.assign(state, { cityId: '', serviceId: '', date: '', slot: '' });
+  state.nid = session.nid; state.name = session.user.name;
+  showPlace();
 }
 
 function choiceList(items, selectedId) {
@@ -629,7 +606,7 @@ async function showPlace(msg) {
     </div>
     <div id="docs">${service() ? docsBox(service().requiredDocs) : ''}</div>
     <button class="btn" id="next" ${c && service() ? '' : 'disabled'}>التالي</button>`;
-  document.getElementById('back').onclick = () => (session ? go('#/') : showNid('book'));
+  document.getElementById('back').onclick = () => go('#/');
   document.getElementById('city').onchange = (e) => {
     state.cityId = e.target.value;
     if (city() && !city().serviceIds.includes(state.serviceId)) state.serviceId = '';
@@ -666,7 +643,6 @@ function renderDays(msg) {
   const day = days.find((d) => d.date === state.date);
   const items = days.map((d) => ({ id: d.date, label: fmtDay(d.date), disabled: d.remaining === 0, full: d.remaining === 0,
     meta: d.remaining === 0 ? 'مكتمل' : `متاح ${arNum(d.remaining)} حجز` }));
-  if (!state.payment && session && session.user.payment) state.payment = session.user.payment;
   app.innerHTML = daysHead(msg) + `
     ${open.length ? choiceList(items, state.date) : '<div class="empty">كل الأيام المتاحة اكتملت. جرّب تاني بكرة، بيتفتح يوم جديد كل يوم.</div>'}
     ${day ? `
@@ -674,16 +650,15 @@ function renderDays(msg) {
       <div class="legend"><span class="ok">متاح</span><span class="no">محجوز</span></div>
       <div class="slots">
         ${state.slots.map((t) => { const taken = day.taken.includes(t);
-          return `<button class="slot" data-slot="${t}" ${taken ? 'disabled aria-label="' + t + ' محجوز"' : ''} aria-pressed="${t === state.slot}">${t}</button>`; }).join('')}
+          return `<button class="slot" data-slot="${esc(t)}" ${taken ? 'disabled aria-label="' + esc(t) + ' محجوز"' : ''} aria-pressed="${t === state.slot}">${esc(t)}</button>`; }).join('')}
       </div>` : ''}
     ${day && state.slot ? `
       <div class="summary" id="sum">
         <div><span>طالب الخدمة</span><b>${esc(state.name)}</b></div>
         <div><span>الخدمة</span><b>${esc(service().name)}</b></div>
         <div><span>المدينة</span><b>${esc(city().name)}</b></div>
-        <div><span>الموعد</span><b>${esc(fmtDay(state.date))} · <bdi dir="ltr">${state.slot}</bdi></b></div>
+        <div><span>الموعد</span><b>${esc(fmtDay(state.date))} · <bdi dir="ltr">${esc(state.slot)}</bdi></b></div>
       </div>
-      <div class="field"><label>طريقة الدفع</label>${payToggle(state.payment)}</div>
       <button class="btn" id="confirm" style="background:var(--accent)">تأكيد الحجز</button>` : ''}`;
   document.getElementById('back').onclick = () => showPlace();
   app.querySelectorAll('.choice').forEach((b) => b.onclick = () => {
@@ -694,19 +669,17 @@ function renderDays(msg) {
     state.slot = b.dataset.slot; renderDays();
     document.getElementById('sum')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
-  bindPay((v) => { state.payment = v; });
   const confirm = document.getElementById('confirm');
   if (confirm) confirm.onclick = async () => {
-    if (!state.payment) { const m = document.querySelector('.seg'); m.insertAdjacentHTML('beforebegin', alertBox('اختار طريقة الدفع')); return; }
     busy(confirm, 'جاري تأكيد الحجز');
-    const payload = { nationalId: state.nid, cityId: state.cityId, serviceId: state.serviceId, date: state.date, slot: state.slot, payment: state.payment };
-    if (session) payload.token = session.token; else payload.name = state.name;
+    if (!session) return go('#/book');
+    const payload = { token: session.token, cityId: state.cityId, serviceId: state.serviceId, date: state.date, slot: state.slot };
     try {
       const b = await api('book', payload);
       delete avail[state.cityId];
       showTicket(b);
     } catch (e) {
-      if (/سجل دخول/.test(e.message)) { setSession(null); }
+      if (!session) return requireLogin('#/book');
       state.slot = '';
       showDays(e.message);
     }
@@ -718,7 +691,6 @@ const RULES = [
   'ضرورة تواجد الشخص المنوط بالخدمة وإحضار أصل البطاقة الشخصية معه.',
   'ضرورة التواجد قبل الموعد بـ 10 دقائق بالمركز التكنولوجي.',
   'يعتبر الحجز لاغي في حالة عدم التواجد بالموعد المقرر بالحجز.',
-  'ضرورة إحضار كارت الحجز مطبوع.',
 ];
 
 function cardHtml(b, small) {
@@ -731,7 +703,6 @@ function cardHtml(b, small) {
           <dt>الاسم</dt><dd>${esc(b.customerName || '')}</dd>
           <dt>الرقم القومي</dt><dd><bdi dir="ltr">${esc(b.nidMasked)}</bdi></dd>
           <dt>المدينة</dt><dd>${esc(b.cityName)}</dd>
-          ${b.paymentLabel ? `<dt>طريقة الدفع</dt><dd>${esc(b.paymentLabel)}</dd>` : ''}
         </dl>
         <div class="when">
           <div><small>اليوم</small><b>${esc(fmtDay(b.date))}</b></div>
@@ -776,7 +747,7 @@ function printCard(code) {
 function showTicket(b) {
   app.innerHTML = `
     <h2 tabindex="-1">تم تأكيد الحجز</h2>
-    <p class="hint">اطبع الكارت ده وهاته معاك يوم الموعد مع أصل البطاقة.</p>
+    <p class="hint">احتفظ بكود الحجز، وهات أصل البطاقة معاك يوم الموعد.</p>
     ${cardHtml(b)}
     ${docsBox(b.requiredDocs)}
     <button class="btn" id="print">طباعة كارت الحجز</button>
@@ -785,15 +756,14 @@ function showTicket(b) {
   drawCodes(104);
   document.getElementById('print').onclick = () => printCard(b.code);
   document.getElementById('home').onclick = () => go('#/');
-  document.getElementById('mine').onclick = () => (session ? go('#/mine') : loadMine());
+  document.getElementById('mine').onclick = () => go('#/mine');
   focusTop();
 }
 
 async function loadMine() {
-  const nid = session ? session.nid : state.nid;
   app.innerHTML = '<h2 tabindex="-1">حجوزاتي</h2><div class="empty" style="margin-top:14px"><span class="spinner"></span>جاري التحميل</div>';
-  try { showMine(await api('myBookings', { nationalId: nid })); }
-  catch (e) { app.innerHTML = '<h2>حجوزاتي</h2>' + alertBox(e.message); }
+  try { showMine(await api('myBookings', { token: session.token })); }
+  catch (e) { if (!session) return requireLogin('#/mine'); app.innerHTML = '<h2>حجوزاتي</h2>' + alertBox(e.message); }
 }
 
 function showMine({ bookings = [] } = {}, msg) {
@@ -814,9 +784,8 @@ function showMine({ bookings = [] } = {}, msg) {
   app.querySelectorAll('.cancel').forEach((btn) => btn.onclick = async () => {
     if (!confirm('متأكد إنك عايز تلغي الحجز ' + btn.dataset.code + '؟ الموعد هيبقى متاح لغيرك.')) return;
     busy(btn, 'جاري الإلغاء');
-    const nid = session ? session.nid : state.nid;
-    try { await api('cancel', { nationalId: nid, code: btn.dataset.code }); showMine(await api('myBookings', { nationalId: nid })); }
-    catch (e) { idle(btn); showMine({ bookings }, e.message); }
+    try { await api('cancel', { token: session.token, code: btn.dataset.code }); showMine(await api('myBookings', { token: session.token })); }
+    catch (e) { if (!session) return requireLogin('#/mine'); idle(btn); showMine({ bookings }, e.message); }
   });
   focusTop();
 }
